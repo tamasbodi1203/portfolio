@@ -19,25 +19,23 @@ public class TradeService {
         this.tradeRepository = tradeRepository;
     }
 
-    public void addTrade(Trade trade){
-        tradeRepository.addTrade(trade);
+    public void saveTrade(Trade trade){
+        trade.setTotal(trade.getPrice() * trade.getAmount());
+        tradeRepository.save(trade);
         log.info("Trade added: " + trade.toString());
     }
 
     public List<Trade> getTrades(){
-        return tradeRepository.getTrades();
+        return tradeRepository.findAll();
     }
 
     public void deleteTrade(long id){
-        tradeRepository.deleteTrade(id);
+        tradeRepository.deleteById(id);
         log.info("Trade deleted with id: " + Long.toString(id));
     }
 
     public Trade getTradeById(long id) {
-        return tradeRepository.getTradeById(id);
+        return tradeRepository.findById(id).orElseThrow(null);
     }
 
-    public void saveTrade(Trade trade) {
-        tradeRepository.saveTrade(trade);
-    }
 }

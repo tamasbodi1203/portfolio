@@ -10,23 +10,34 @@
     <form action="#" th:action="${trade.id} == null ? @{/trade/create} : @{/trade/edit/{id}(id=${trade.id})}" th:object="${trade}" method="post">
         <div class="form-group">
             <label for="date">Date</label>
-            <input type="date" class="form-control" id="date" th:field="*{date}">
+            <input type="date" class="form-control" id="date"  th:field="*{date}">
+            <span class="validationError" th:if="${#fields.hasErrors('date')}" th:errors="*{date}"></span>
         </div>
         <div class="form-group">
             <label for="pair">Trading pair</label>
-            <input type="text" class="form-control" id="pair" th:field="*{pair}">
+            <select class="form-control" id="pair" th:field="*{pair}">
+                <option th:each="currencyPair : ${T(hu.portfoliotracker.Enum.CurrencyPair).values()}"
+                        th:value="${currencyPair}"
+                        th:text="${currencyPair}">
+                </option>
+            </select>
         </div>
         <div class="form-group">
             <label for="side">Side</label>
-            <input type="text" class="form-control" id="side" th:field="*{side}">
+            <select class="form-control" id="side" th:field="*{side}">
+                <option th:value="'BUY'" th:text="Buy"></option>
+                <option th:value="'SELL'" th:text="Sell"></option>
+            </select>
         </div>
         <div class="form-group">
             <label for="price">Price</label>
             <input type="number" class="form-control" id="price" th:field="*{price}">
+            <span class="validationError" th:if="${#fields.hasErrors('price')}" th:errors="*{price}"></span>
         </div>
         <div class="form-group">
             <label for="amount">Amount</label>
             <input type="number" class="form-control" id="amount" th:field="*{amount}">
+            <span class="validationError" th:if="${#fields.hasErrors('amount')}" th:errors="*{amount}"></span>
         </div>
         <button type="submit" class="btn btn-primary" th:text="${trade.id != null ? 'Modify' : 'Submit'}">Submit</button>
     </form>
