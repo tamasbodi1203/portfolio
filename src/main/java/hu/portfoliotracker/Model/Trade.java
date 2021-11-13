@@ -1,6 +1,6 @@
 package hu.portfoliotracker.Model;
 
-import hu.portfoliotracker.Enum.CurrencyPair;
+import hu.portfoliotracker.Enum.CURRENCY_PAIR;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -21,7 +21,7 @@ public class Trade {
     private Date date;
     @Column(name = "pair_col", nullable = false)
     @Enumerated(EnumType.STRING)
-    private CurrencyPair pair;
+    private CURRENCY_PAIR pair;
     @Column(name = "side_col", nullable = false)
     @NotEmpty(message = "Az oldal nem lehet üres")
     private String side;

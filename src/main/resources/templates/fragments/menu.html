@@ -5,8 +5,9 @@
     </button>
     <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
         <div class="navbar-nav">
-            <a class="nav-item nav-link" th:classappend="${current} == 'Create' ? 'active' : ''" th:href="@{/trade/create}">Add trade</a>
-            <a class="nav-item nav-link" th:classappend="${current} == 'List' ? 'active' : ''" th:href="@{/trade}">Trade history</a>
+            <a class="nav-item nav-link" th:classappend="${current} == 'Portfolio' ? 'active' : ''" th:href="@{/}">Portfolio</a>
+            <a class="nav-item nav-link" th:classappend="${current} == 'Trade history' ? 'active' : ''" th:href="@{/trade-history}">Trade history</a>
+            <a class="nav-item nav-link" th:classappend="${current} == 'Add trade' ? 'active' : ''" th:href="@{/trade-history/add}">Add trade</a>
         </div>
     </div>
 </nav>
