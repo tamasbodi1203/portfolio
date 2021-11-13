@@ -7,9 +7,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -42,8 +44,11 @@ public class TradeController {
     }
 
     @PostMapping("/create")
-    public String createTrade(Trade trade) {
-        tradeService.addTrade(trade);
+    public String createTrade(@Valid Trade trade, BindingResult result) {
+        if (result.hasErrors()) {
+            return "trade-create";
+        }
+        tradeService.saveTrade(trade);
         return "redirect:/trade";
     }
 
@@ -63,7 +68,10 @@ public class TradeController {
     }
     
     @PostMapping("/edit/{id}")
-    public String editTrade(Trade trade){
+    public String editTrade(@Valid Trade trade, BindingResult result){
+        if (result.hasErrors()) {
+            return "trade-create";
+        }
         tradeService.saveTrade(trade);
         return "redirect:/trade";
     }
