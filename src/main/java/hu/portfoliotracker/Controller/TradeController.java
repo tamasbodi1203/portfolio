@@ -2,7 +2,6 @@ package hu.portfoliotracker.Controller;
 
 import hu.portfoliotracker.Model.Trade;
 import hu.portfoliotracker.Service.TradeService;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.stereotype.Controller;
@@ -16,7 +15,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 @Controller
-@RequestMapping("/trade")
+@RequestMapping("/trade-history")
 public class TradeController {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(TradeController.class);
 
@@ -35,28 +34,28 @@ public class TradeController {
     @GetMapping
     public String listOfTrades(Model model) {
         model.addAttribute("trades", tradeService.getTrades());
-        return "home";
+        return "trade-history";
     }
 
-    @GetMapping("/create")
+    @GetMapping("/add")
     public String showTradeCreateForm(Trade trade) {
         return "trade-create";
     }
 
-    @PostMapping("/create")
+    @PostMapping("/add")
     public String createTrade(@Valid Trade trade, BindingResult result) {
         if (result.hasErrors()) {
             return "trade-create";
         }
         tradeService.saveTrade(trade);
-        return "redirect:/trade";
+        return "redirect:/trade-history";
     }
 
 
     @GetMapping("/delete/{id}")
     public String deleteTrade(@PathVariable long id){
         tradeService.deleteTrade(id);
-        return "redirect:/trade";
+        return "redirect:/trade-history";
     }
 
 
@@ -73,6 +72,6 @@ public class TradeController {
             return "trade-create";
         }
         tradeService.saveTrade(trade);
-        return "redirect:/trade";
+        return "redirect:/trade-history";
     }
 }
