@@ -23,9 +23,9 @@
             <td th:text="${trade.date}"></td>
             <td th:text="${trade.pair}"></td>
             <td th:text="${trade.side}"></td>
-            <td th:text="${trade.price} + '$'"></td>
+            <td th:text="${currency} + ${#numbers.formatDecimal(trade.price,1,4)}"></td>
             <td th:text="${trade.amount}"></td>
-            <td th:text="${trade.total} + '$'"></td>
+            <td th:text="${currency} + ${#numbers.formatDecimal(trade.total,1,4)}"></td>
             <td>
                 <a th:href="@{/trade-history/delete/{id}(id=${trade.id})}">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash-fill" viewBox="0 0 16 16">

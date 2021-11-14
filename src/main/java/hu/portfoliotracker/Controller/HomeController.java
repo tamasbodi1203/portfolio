@@ -15,6 +15,7 @@ public class HomeController {
     @GetMapping
     public String listOfPositions(Model model) {
         model.addAttribute("positions", positionService.getPositions());
+        model.addAttribute("currency", "$");
         return "home";
     }
 }

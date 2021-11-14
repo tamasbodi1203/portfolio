@@ -34,6 +34,7 @@ public class TradeController {
     @GetMapping
     public String listOfTrades(Model model) {
         model.addAttribute("trades", tradeService.getTrades());
+        model.addAttribute("currency", "$");
         return "trade-history";
     }
 
