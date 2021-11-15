@@ -7,14 +7,15 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
 @Data
-@Table(name = "POSITION_TABLE")
-public class Position {
+@Table(name = "OPEN_POSITION_TABLE")
+public class OpenPosition {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -24,6 +25,8 @@ public class Position {
     private CURRENCY_PAIR pair;
     @Column(name = "currentPrice_col")
     private double currentPrice;
+    @Column(name = "date_col")
+    private LocalDateTime date;
     @Column(name = "deposit_col")
     private double deposit;
     @Column(name = "quantity_col")
