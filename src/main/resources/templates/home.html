@@ -21,12 +21,12 @@
         <tbody>
         <tr th:each="position: ${positions}">
             <td th:text="${position.pair}"></td>
-            <td th:text="${position.currentPrice} + '$'"></td>
-            <td th:text="${position.deposit} + '$'"></td>
-            <td th:text="${position.quantity}"></td>
-            <td th:text="${position.averageCostBasis} + '$'"></td>
-            <td th:text="${position.marketValue} + '$'"></td>
-            <td th:text="${position.profit} + '$'"></td>
+            <td th:text="${currency} + ${position.currentPrice}"></td>
+            <td th:text="${currency} + ${#numbers.formatDecimal(position.deposit,1,2)}"></td>
+            <td th:text="${#numbers.formatDecimal(position.quantity,1,4)}"></td>
+            <td th:text="${currency} + ${#numbers.formatDecimal(position.averageCostBasis,1,2)}"></td>
+            <td th:text="${currency} + ${#numbers.formatDecimal(position.marketValue,1,2)}"></td>
+            <td th:text="${currency} + ${#numbers.formatDecimal(position.profit,1,2)}"></td>
         </tr>
         </tbody>
     </table>

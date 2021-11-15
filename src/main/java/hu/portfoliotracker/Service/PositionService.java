@@ -18,6 +18,8 @@ public class PositionService {
     private PositionRepository positionRepository;
     @Autowired
     private TradeRepository tradeRepository;
+    @Autowired
+    private BinanceService binanceService;
 
     public void initPositions(){
         List<CURRENCY_PAIR> pairs = tradeRepository.findAllDistinctPair();
@@ -29,7 +31,7 @@ public class PositionService {
             double averageCostBasis =  depositWithoutSell / amountBought;
 
             double deposit = tradeRepository.getTotalDepositByPair(pair) - (averageCostBasis * amountSold);
-            double currentPrice = pair.getNumVal();
+            double currentPrice = binanceService.getLastPrice(pair);
             double marketValue = quantity * currentPrice;
             double profit = (currentPrice - averageCostBasis) * quantity;
 
