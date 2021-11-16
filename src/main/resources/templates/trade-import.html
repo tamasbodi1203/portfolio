@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<div th:replace="fragments/header :: header (title='Import trade')"></div>
+<body>
+
+<div th:replace="fragments/menu :: menu (current='Import trade')"></div>
+
+<div class="container">
+    <form action="#" th:action="@{/trade-history/import}" method="post" enctype="multipart/form-data">
+        <div class="form-group">
+            <input type="file" class="form-control" id="import" name="file">
+        </div>
+        <button type="submit" name="action" value="import" class="btn btn-primary">Import</button>
+        <button type="submit" name="action" value="cancel" class="btn btn-primary">Cancel</button>
+    </form>
+</div>
+
+</body>
+</html>

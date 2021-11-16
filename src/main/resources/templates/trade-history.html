@@ -42,6 +42,11 @@
         </tr>
         </tbody>
     </table>
+    <form action="#" th:action="@{/trade-history}" method="post">
+        <button type="submit" name="action" value="add" class="btn btn-primary">Add trade</button>
+        <button type="submit" name="action" value="import" class="btn btn-primary">Import trades from CSV</button>
+        <button type="submit" name="action" value="clear" class="btn btn-primary">Clear trade history</button>
+    </form>
 </div>
 
 </body>

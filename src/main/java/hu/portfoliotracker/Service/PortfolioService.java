@@ -9,6 +9,7 @@ import hu.portfoliotracker.Repository.OpenPositionRepository;
 import hu.portfoliotracker.Repository.TradeRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.Iterator;
@@ -62,7 +63,10 @@ public class PortfolioService {
         }
     }
 
+    //@Async("threadPoolTaskExecutor")
     public void initPositions() {
+        System.out.println("Execute method asynchronously. "
+                + Thread.currentThread().getName());
         openPositionRepository.deleteAll();
         closedPositionRepository.deleteAll();
         List<CURRENCY_PAIR> pairs = tradeRepository.findAllDistinctPair();
@@ -94,8 +98,8 @@ public class PortfolioService {
                     deposit -= closedPosition.getDeposit();
                     quantity -= closedPosition.getQuantity();
                     }
-                if (!iterator.hasNext()) {
-                    // Csak a végső nyitott pozíciót kell tárolnunk
+                if (!iterator.hasNext() && !quantity.equals(0.0)) {
+                    // Csak a végső nyitott pozíciót kell tárolnunk, ha a mennyiség nem 0
                     Double currentPrice = binanceService.getLastPrice(pair);
                     OpenPosition openPosition = OpenPosition.builder()
                             .pair(pair)
@@ -124,12 +128,11 @@ public class PortfolioService {
     }
 
     public List<OpenPosition> getOpenPositions(){
-        //initOpenPositions();
+        binanceService.getMyTradesTest();
         return openPositionRepository.findAllByOrderByPair();
     }
 
     public List<ClosedPosition> getClosedPositions(){
-        //initClosedPositions();
         return closedPositionRepository.findAllByOrderByPairDate();
     }
 

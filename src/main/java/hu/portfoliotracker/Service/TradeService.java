@@ -34,4 +34,8 @@ public class TradeService {
         return tradeRepository.findById(id).orElseThrow(null);
     }
 
+    public void deleteAllTrades(){
+        tradeRepository.deleteAll();
+    }
+
 }
