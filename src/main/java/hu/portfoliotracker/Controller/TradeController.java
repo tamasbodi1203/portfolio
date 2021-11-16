@@ -3,16 +3,12 @@ package hu.portfoliotracker.Controller;
 import hu.portfoliotracker.Model.Trade;
 import hu.portfoliotracker.Service.TradeService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 @Controller
 @RequestMapping("/trade-history")
@@ -24,11 +20,6 @@ public class TradeController {
     @Autowired
     public void setTradeService(TradeService tradeService) {
         this.tradeService = tradeService;
-    }
-
-    @InitBinder
-    public void initBinder(WebDataBinder binder) {
-        binder.registerCustomEditor(Date.class, new CustomDateEditor(new SimpleDateFormat("yyyy-MM-dd"), true));
     }
 
     @GetMapping

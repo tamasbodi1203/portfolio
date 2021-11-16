@@ -12,8 +12,19 @@ import java.util.List;
 @Repository
 public interface TradeRepository extends JpaRepository<Trade, Long> {
 
+    List<Trade> findAllByOrderByDate();
+
+    @Query("SELECT t from Trade t WHERE pair = :pair ORDER BY t.date")
+    List<Trade> findAllByPairOrderByDate(@Param("pair") CURRENCY_PAIR pair);
+
     @Query("SELECT DISTINCT pair FROM Trade t")
     List<CURRENCY_PAIR> findAllDistinctPair();
+
+    @Query("SELECT DISTINCT pair FROM Trade t WHERE side = 'SELL'")
+    List<CURRENCY_PAIR> findAllDistinctPairClosed();
+
+    @Query("SELECT t FROM Trade t WHERE pair = :pair AND side = 'SELL'")
+    List<Trade> findAllSellTrade(@Param("pair") CURRENCY_PAIR pair);
 
     @Query("SELECT SUM(amount) FROM Trade t WHERE pair = :pair AND side = 'BUY'")
     double getAmountBoughtByPair(@Param("pair") CURRENCY_PAIR pair);

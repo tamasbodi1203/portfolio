@@ -20,7 +20,7 @@
         </thead>
         <tbody>
         <tr th:each="trade: ${trades}">
-            <td th:text="${trade.date}"></td>
+            <td th:text="${#temporals.format(trade.date, 'yyyy-MM-dd HH:mm:ss')}"></td>
             <td th:text="${trade.pair}"></td>
             <td th:text="${trade.side}"></td>
             <td th:text="${currency} + ${#numbers.formatDecimal(trade.price,1,4)}"></td>

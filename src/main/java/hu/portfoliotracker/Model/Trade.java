@@ -2,10 +2,11 @@ package hu.portfoliotracker.Model;
 
 import hu.portfoliotracker.Enum.CURRENCY_PAIR;
 import lombok.Data;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.*;
 import javax.validation.constraints.*;
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @Entity
 @Data
@@ -15,10 +16,11 @@ public class Trade {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
+
+    //TODO: Forma validáció szükséges
     @Column(name = "date_col", nullable = false)
     @NotNull(message = "Dátum megadása kötelező")
-    @PastOrPresent (message = "A dátum nem lehet későbbi időpont, mint a mai nap")
-    private Date date;
+    private LocalDateTime date;
     @Column(name = "pair_col", nullable = false)
     @Enumerated(EnumType.STRING)
     private CURRENCY_PAIR pair;

@@ -12,12 +12,8 @@ import java.util.List;
 @Slf4j
 public class TradeService {
 
-    private TradeRepository tradeRepository;
-
     @Autowired
-    public void setTradeRepository(TradeRepository tradeRepository) {
-        this.tradeRepository = tradeRepository;
-    }
+    private TradeRepository tradeRepository;
 
     public void saveTrade(Trade trade){
         trade.setTotal(trade.getPrice() * trade.getAmount());
@@ -26,7 +22,7 @@ public class TradeService {
     }
 
     public List<Trade> getTrades(){
-        return tradeRepository.findAll();
+        return tradeRepository.findAllByOrderByDate();
     }
 
     public void deleteTrade(long id){

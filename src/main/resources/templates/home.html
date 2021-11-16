@@ -11,6 +11,7 @@
         <tr>
             <th scope="col">Pair</th>
             <th scope="col">Current Price</th>
+            <th scope="col">Opening Date</th>
             <th scope="col">Deposit</th>
             <th scope="col">Quantity</th>
             <th scope="col">Average cost basis</th>
@@ -19,14 +20,43 @@
         </tr>
         </thead>
         <tbody>
-        <tr th:each="position: ${positions}">
-            <td th:text="${position.pair}"></td>
-            <td th:text="${currency} + ${position.currentPrice}"></td>
-            <td th:text="${currency} + ${#numbers.formatDecimal(position.deposit,1,2)}"></td>
-            <td th:text="${#numbers.formatDecimal(position.quantity,1,4)}"></td>
-            <td th:text="${currency} + ${#numbers.formatDecimal(position.averageCostBasis,1,2)}"></td>
-            <td th:text="${currency} + ${#numbers.formatDecimal(position.marketValue,1,2)}"></td>
-            <td th:text="${currency} + ${#numbers.formatDecimal(position.profit,1,2)}"></td>
+        <tr th:each="openPosition: ${openPositions}">
+            <td th:text="${openPosition.pair}"></td>
+            <td th:text="${currency} + ${openPosition.currentPrice}"></td>
+            <td th:text="${#temporals.format(openPosition.date, 'yyyy-MM-dd HH:mm:ss')}"></td>
+            <td th:text="${currency} + ${#numbers.formatDecimal(openPosition.deposit,1,2)}"></td>
+            <td th:text="${#numbers.formatDecimal(openPosition.quantity,1,4)}"></td>
+            <td th:text="${currency} + ${#numbers.formatDecimal(openPosition.averageCostBasis,1,2)}"></td>
+            <td th:text="${currency} + ${#numbers.formatDecimal(openPosition.marketValue,1,2)}"></td>
+            <td th:text="${currency} + ${#numbers.formatDecimal(openPosition.profit,1,2)}"></td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+<div class="container">
+    <table class="table">
+        <thead>
+        <tr>
+            <th scope="col">Pair</th>
+            <th scope="col">Sell Price</th>
+            <th scope="col">Closing Date</th>
+            <th scope="col">Deposit</th>
+            <th scope="col">Quantity</th>
+            <th scope="col">Average cost basis</th>
+            <th scope="col">Market Value</th>
+            <th scope="col">Profit</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="closedPosition: ${closedPositions}">
+            <td th:text="${closedPosition.pair}"></td>
+            <td th:text="${currency} + ${closedPosition.sellPrice}"></td>
+            <td th:text="${#temporals.format(closedPosition.date, 'yyyy-MM-dd HH:mm:ss')}"></td>
+            <td th:text="${currency} + ${#numbers.formatDecimal(closedPosition.deposit,1,2)}"></td>
+            <td th:text="${#numbers.formatDecimal(closedPosition.quantity,1,4)}"></td>
+            <td th:text="${currency} + ${#numbers.formatDecimal(closedPosition.averageCostBasis,1,2)}"></td>
+            <td th:text="${currency} + ${#numbers.formatDecimal(closedPosition.marketValue,1,2)}"></td>
+            <td th:text="${currency} + ${#numbers.formatDecimal(closedPosition.profit,1,2)}"></td>
         </tr>
         </tbody>
     </table>
