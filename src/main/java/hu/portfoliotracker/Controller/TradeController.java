@@ -29,6 +29,12 @@ public class TradeController {
         return "trade-history";
     }
 
+    @PostMapping
+    public String addTrade(){
+        return "redirect:/trade-history/add";
+    }
+
+
     @GetMapping("/add")
     public String showTradeCreateForm(Trade trade) {
         return "trade-create";

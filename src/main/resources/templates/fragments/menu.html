@@ -7,7 +7,6 @@
         <div class="navbar-nav">
             <a class="nav-item nav-link" th:classappend="${current} == 'Portfolio' ? 'active' : ''" th:href="@{/}">Portfolio</a>
             <a class="nav-item nav-link" th:classappend="${current} == 'Trade history' ? 'active' : ''" th:href="@{/trade-history}">Trade history</a>
-            <a class="nav-item nav-link" th:classappend="${current} == 'Add trade' ? 'active' : ''" th:href="@{/trade-history/add}">Add trade</a>
         </div>
     </div>
 </nav>
