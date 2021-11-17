@@ -9,6 +9,7 @@ import hu.portfoliotracker.Repository.OpenPositionRepository;
 import hu.portfoliotracker.Repository.TradeRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.Iterator;
@@ -62,7 +63,10 @@ public class PortfolioService {
         }
     }
 
+    //@Async("threadPoolTaskExecutor")
     public void initPositions() {
+        System.out.println("Execute method asynchronously. "
+                + Thread.currentThread().getName());
         openPositionRepository.deleteAll();
         closedPositionRepository.deleteAll();
         List<CURRENCY_PAIR> pairs = tradeRepository.findAllDistinctPair();

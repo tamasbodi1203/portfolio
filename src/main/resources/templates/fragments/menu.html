@@ -1,12 +1,12 @@
 <nav class="navbar navbar-expand-lg navbar-light bg-light" th:fragment="menu(current)" xmlns:th="http://www.thymeleaf.org">
-    <a class="navbar-brand" href="#"><img class="logo" th:src="@{/images/btc_logo.png}" width="10%" height="10%"></a>
+    <a class="navbar-brand"><img class="logo" th:src="@{/images/btc_logo.png}" width="10%" height="10%"></a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
         <div class="navbar-nav">
             <a class="nav-item nav-link" th:classappend="${current} == 'Portfolio' ? 'active' : ''" th:href="@{/}">Portfolio</a>
-            <a class="nav-item nav-link" th:classappend="${current} == 'Trade history' ? 'active' : ''" th:href="@{/trade-history}">Trade history</a>
+            <a class="nav-item nav-link" th:classappend="${current} == 'Trade history' ? 'active' : ''" th:href="@{/trade-history}">Trade History</a>
         </div>
     </div>
 </nav>
