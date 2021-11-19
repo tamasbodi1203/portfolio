@@ -14,27 +14,27 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Entity
 @Data
-@Table(name = "CLOSED_POSITION_TABLE")
+@Table(name = "CLOSED_POSITION")
 public class ClosedPosition {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
-    @Column(name = "pair_col")
+    @Column(name = "PAIR")
     @Enumerated(EnumType.STRING)
     private CURRENCY_PAIR pair;
-    @Column(name = "sellPrice_col")
+    @Column(name = "SELL_PRICE")
     private double sellPrice;
-    @Column(name = "date_col")
+    @Column(name = "DATE")
     private LocalDateTime date;
-    @Column(name = "deposit_col")
+    @Column(name = "DEPOSIT")
     private double deposit;
-    @Column(name = "quantity_col")
+    @Column(name = "QUANTITY")
     private double quantity;
-    @Column(name = "averageCostBasis_col")
+    @Column(name = "AVERAGE_COST_BASIS")
     private double averageCostBasis;
-    @Column(name = "marketValue_col")
+    @Column(name = "MARKET_VALUE")
     private double marketValue;
-    @Column(name = "profit_col")
+    @Column(name = "PROFIT")
     private double profit;
 }

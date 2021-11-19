@@ -39,7 +39,7 @@
             <input type="number" step="any" class="form-control" id="amount" th:field="*{amount}">
             <span class="validationError" th:if="${#fields.hasErrors('amount')}" th:errors="*{amount}"></span>
         </div>
-        <button type="submit" class="btn btn-primary" th:text="${trade.id != null ? 'Modify' : 'Submit'}">Submit</button>
+        <button type="submit" class="btn btn-primary" th:text="${trade.id != null ? 'Modify' : 'Add'}">Submit</button>
     </form>
 </div>
 
