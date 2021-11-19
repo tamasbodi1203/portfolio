@@ -42,7 +42,7 @@ public class CSVHelper {
             for (CSVRecord csvRecord : csvRecords) {
                 Trade trade = Trade.builder()
                         .date(LocalDateTime.parse(csvRecord.get("Date(UTC)"), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
-                        .pair(CURRENCY_PAIR.valueOf(csvRecord.get("Market")))
+                        .pair(csvRecord.get("Market"))
                         .side(csvRecord.get("Type"))
                         .price(Double.parseDouble(csvRecord.get("Price")))
                         .amount(Double.parseDouble(csvRecord.get("Amount")))

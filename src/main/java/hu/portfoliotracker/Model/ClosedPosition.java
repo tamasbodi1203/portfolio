@@ -1,5 +1,6 @@
 package hu.portfoliotracker.Model;
 
+import hu.portfoliotracker.Enum.CURRENCY;
 import hu.portfoliotracker.Enum.CURRENCY_PAIR;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -20,9 +21,9 @@ public class ClosedPosition {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
-    @Column(name = "PAIR")
-    @Enumerated(EnumType.STRING)
-    private CURRENCY_PAIR pair;
+    @Column(name = "SYMBOL")
+    //@Enumerated(EnumType.STRING)
+    private String symbol;
     @Column(name = "SELL_PRICE")
     private double sellPrice;
     @Column(name = "DATE")

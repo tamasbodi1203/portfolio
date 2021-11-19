@@ -4,6 +4,8 @@ public enum CURRENCY_PAIR {
 
     ADABUSD,
     BTCBUSD,
+    BTCEUR,
+    BTCETH,
     BNBBUSD,
     DOTBUSD,
     ETHBUSD,
@@ -11,15 +13,5 @@ public enum CURRENCY_PAIR {
     VETBUSD,
     XLMBUSD,
     XRPBUSD
-
-//    private double numVal;
-//
-//    CURRENCY_PAIR(double numVal){
-//        this.numVal = numVal;
-//    }
-//
-//    public double getNumVal() {
-//        return this.numVal;
-//    }
 
 }

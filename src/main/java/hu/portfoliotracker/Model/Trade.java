@@ -28,8 +28,8 @@ public class Trade {
     private LocalDateTime date;
 
     @Column(name = "PAIR", nullable = false)
-    @Enumerated(EnumType.STRING)
-    private CURRENCY_PAIR pair;
+    //@Enumerated(EnumType.STRING)
+    private String pair;
 
     @Column(name = "SIDE", nullable = false)
     @NotEmpty(message = "Az oldal nem lehet üres")

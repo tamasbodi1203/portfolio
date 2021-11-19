@@ -1,15 +1,15 @@
 package hu.portfoliotracker.Service;
 
-import hu.portfoliotracker.Enum.CURRENCY_PAIR;
 import hu.portfoliotracker.Model.ClosedPosition;
 import hu.portfoliotracker.Model.OpenPosition;
 import hu.portfoliotracker.Model.Trade;
+import hu.portfoliotracker.Model.TradingPair;
 import hu.portfoliotracker.Repository.ClosedPositionRepository;
 import hu.portfoliotracker.Repository.OpenPositionRepository;
 import hu.portfoliotracker.Repository.TradeRepository;
+import hu.portfoliotracker.Repository.TradingPairRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.Iterator;
@@ -27,91 +27,82 @@ public class PortfolioService {
     private TradeRepository tradeRepository;
     @Autowired
     private BinanceService binanceService;
-
-    //FIXME: Deposit nem stimmel
-    public void initOpenPositions(){
-        List<CURRENCY_PAIR> pairs = tradeRepository.findAllDistinctPair();
-        for (CURRENCY_PAIR pair :pairs) {
-            double amountBought = tradeRepository.getAmountBoughtByPair(pair);
-            Double amountSold = tradeRepository.getAmountSoldByPair(pair) != null ? tradeRepository.getAmountSoldByPair(pair) : 0;
-            double quantity = amountBought - amountSold;
-            double depositWithoutSell = tradeRepository.getTotalDepositByPair(pair);
-            double averageCostBasis =  depositWithoutSell / amountBought;
-
-            double deposit = tradeRepository.getTotalDepositByPair(pair) - (averageCostBasis * amountSold);
-            double currentPrice = binanceService.getLastPrice(pair);
-            double marketValue = quantity * currentPrice;
-            double profit = (currentPrice - averageCostBasis) * quantity;
-
-            OpenPosition openPosition = OpenPosition.builder()
-                    .pair(pair)
-                    .currentPrice(currentPrice)
-                    .deposit(deposit)
-                    .quantity(quantity)
-                    .averageCostBasis(averageCostBasis)
-                    .marketValue(marketValue)
-                    .profit(profit)
-                    .build();
-
-            List<CURRENCY_PAIR> positionPairs = openPositionRepository.getAllPairs();
-            if (!positionPairs.contains(openPosition.getPair())) {
-                saveOpenPosition(openPosition);
-            } else {
-                openPositionRepository.delete(openPositionRepository.findByPair(pair));
-                saveOpenPosition(openPosition);
-            }
-        }
-    }
+    @Autowired
+    TradingPairRepository tradingPairRepository;
 
     //@Async("threadPoolTaskExecutor")
     public void initPositions() {
         System.out.println("Execute method asynchronously. "
                 + Thread.currentThread().getName());
+
+        // Töröljük minden futtatáskor a már meglévő pozíciókat, hogy ne duplikálódjanak
         openPositionRepository.deleteAll();
         closedPositionRepository.deleteAll();
-        List<CURRENCY_PAIR> pairs = tradeRepository.findAllDistinctPair();
-        for (CURRENCY_PAIR pair :pairs) {
-            List<Trade> trades = tradeRepository.findAllByPairOrderByDate(pair);
-            Double averageCostBasis = 0.0;
-            Double deposit = 0.0;
-            Double quantity = 0.0;
+        List<Trade> trades = tradeRepository.findAllByOrderByDate();
+        Iterator<Trade> iterator = trades.iterator();
+        while (iterator.hasNext()) {
+            Trade t = iterator.next();
+            TradingPair tradingPair = tradingPairRepository.findBySymbol(t.getPair());
+            String baseAsset = tradingPair.getBaseAsset();
+            // Vétel
+            if (t.getSide().equals("BUY")){
+                Double currentPrice = binanceService.getLastPrice(baseAsset + "USDT");
 
-            Iterator<Trade> iterator = trades.iterator();
-            while (iterator.hasNext()) {
-                Trade t = iterator.next();
-                if (t.getSide().equals("BUY")){
-                    deposit = deposit + t.getTotal();
-                    quantity = quantity + t.getAmount();
-                    averageCostBasis = deposit / quantity;
-                } else {
-                    ClosedPosition closedPosition = ClosedPosition.builder()
-                            .pair(pair)
-                            .date(t.getDate())
-                            .sellPrice(t.getPrice())
-                            .deposit(t.getAmount() * averageCostBasis)
-                            .quantity(t.getAmount())
-                            .averageCostBasis(averageCostBasis)
-                            .marketValue(t.getAmount() * t.getPrice())
-                            .profit(t.getAmount() * (t.getPrice() - averageCostBasis))
-                            .build();
-                    saveClosedPosition(closedPosition);
-                    deposit -= closedPosition.getDeposit();
-                    quantity -= closedPosition.getQuantity();
-                    }
-                if (!iterator.hasNext() && !quantity.equals(0.0)) {
-                    // Csak a végső nyitott pozíciót kell tárolnunk, ha a mennyiség nem 0
-                    Double currentPrice = binanceService.getLastPrice(pair);
+                // Megnézzük, hogy létezik-e már nyitott számla az adott kriptovalutával ha nem, akkor nyitunk egyet
+                if (openPositionRepository.countBySymbol(baseAsset) == 0L) {
+                    Double averageCostBasis = t.getTotal() /t.getAmount();
                     OpenPosition openPosition = OpenPosition.builder()
-                            .pair(pair)
+                            .symbol(tradingPair.getBaseAsset())
                             .currentPrice(currentPrice)
                             .date(trades.get(0).getDate())
-                            .deposit(deposit)
-                            .quantity(quantity)
+                            .deposit(t.getTotal())
+                            .quantity(t.getAmount())
                             .averageCostBasis(averageCostBasis)
-                            .marketValue(quantity * currentPrice)
-                            .profit((currentPrice - averageCostBasis) * quantity)
+                            .marketValue(t.getAmount() * currentPrice)
+                            .profit((currentPrice - averageCostBasis) * t.getAmount())
                             .build();
+
                     saveOpenPosition(openPosition);
+                } else {
+                    OpenPosition openPosition = openPositionRepository.findBySymbol(baseAsset);
+                    Double deposit = openPosition.getDeposit() + t.getTotal();
+                    Double quantity = openPosition.getQuantity() + t.getAmount();
+                    Double averageCostBasis = deposit / quantity;
+
+                    openPosition.setCurrentPrice(currentPrice);
+                    openPosition.setDeposit(deposit);
+                    openPosition.setQuantity(quantity);
+                    openPosition.setAverageCostBasis(averageCostBasis);
+                    openPosition.setMarketValue(quantity * currentPrice);
+                    openPosition.setProfit((currentPrice - averageCostBasis) * quantity);
+                    saveOpenPosition(openPosition);
+
+                }
+
+                // Eladás
+            } else {
+                OpenPosition openPosition = openPositionRepository.findBySymbol(baseAsset);
+                Double averageCostBasis = openPosition.getAverageCostBasis();
+
+                ClosedPosition closedPosition = ClosedPosition.builder()
+                        .symbol(tradingPair.getSymbol())
+                        .date(t.getDate())
+                        .sellPrice(t.getPrice())
+                        .deposit(t.getAmount() * averageCostBasis)
+                        .quantity(t.getAmount())
+                        .averageCostBasis(averageCostBasis)
+                        .marketValue(t.getAmount() * t.getPrice())
+                        .profit(t.getAmount() * (t.getPrice() - averageCostBasis))
+                        .build();
+
+                saveClosedPosition(closedPosition);
+
+                // Eladás után újra kalkulkuláljuk a megfelelő nyitott pozíciót, ha nem 0 a hátramaradt mennyiség
+                if (openPosition.getQuantity() - closedPosition.getQuantity() != 0L) {
+                    openPosition.setQuantity(openPosition.getQuantity() - closedPosition.getQuantity());
+                    openPosition.setDeposit(openPosition.getDeposit() - closedPosition.getDeposit());
+                } else {
+                    openPositionRepository.delete(openPosition);
                 }
             }
         }
@@ -128,12 +119,12 @@ public class PortfolioService {
     }
 
     public List<OpenPosition> getOpenPositions(){
-        binanceService.getMyTradesTest();
-        return openPositionRepository.findAllByOrderByPair();
+        binanceService.getAllBaseAssets();
+        return openPositionRepository.findAllByOrderBySymbol();
     }
 
     public List<ClosedPosition> getClosedPositions(){
-        return closedPositionRepository.findAllByOrderByPairDate();
+        return closedPositionRepository.findAllByOrderBySymbolDate();
     }
 
 }

@@ -15,24 +15,24 @@ public interface TradeRepository extends JpaRepository<Trade, Long> {
     List<Trade> findAllByOrderByDate();
 
     @Query("SELECT t from Trade t WHERE pair = :pair ORDER BY t.date")
-    List<Trade> findAllByPairOrderByDate(@Param("pair") CURRENCY_PAIR pair);
+    List<Trade> findAllByPairOrderByDate(@Param("pair") String pair);
 
     @Query("SELECT DISTINCT pair FROM Trade t")
-    List<CURRENCY_PAIR> findAllDistinctPair();
+    List<String> findAllDistinctPair();
 
     @Query("SELECT DISTINCT pair FROM Trade t WHERE side = 'SELL'")
-    List<CURRENCY_PAIR> findAllDistinctPairClosed();
+    List<String> findAllDistinctPairClosed();
 
     @Query("SELECT t FROM Trade t WHERE pair = :pair AND side = 'SELL'")
-    List<Trade> findAllSellTrade(@Param("pair") CURRENCY_PAIR pair);
+    List<Trade> findAllSellTrade(@Param("pair") String pair);
 
     @Query("SELECT SUM(amount) FROM Trade t WHERE pair = :pair AND side = 'BUY'")
-    double getAmountBoughtByPair(@Param("pair") CURRENCY_PAIR pair);
+    double getAmountBoughtByPair(@Param("pair") String pair);
 
     @Query("SELECT SUM(amount) FROM Trade t WHERE pair = :pair AND side = 'SELL'")
-    Double getAmountSoldByPair(@Param("pair") CURRENCY_PAIR pair);
+    Double getAmountSoldByPair(@Param("pair") String pair);
 
     @Query("SELECT SUM(total) FROM Trade t WHERE pair = :pair AND side = 'BUY'")
-    double getTotalDepositByPair(@Param("pair") CURRENCY_PAIR pair);
+    double getTotalDepositByPair(@Param("pair") String pair);
 
 }
