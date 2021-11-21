@@ -4,10 +4,7 @@ import hu.portfoliotracker.Model.ClosedPosition;
 import hu.portfoliotracker.Model.OpenPosition;
 import hu.portfoliotracker.Model.Trade;
 import hu.portfoliotracker.Model.TradingPair;
-import hu.portfoliotracker.Repository.ClosedPositionRepository;
-import hu.portfoliotracker.Repository.OpenPositionRepository;
-import hu.portfoliotracker.Repository.TradeRepository;
-import hu.portfoliotracker.Repository.TradingPairRepository;
+import hu.portfoliotracker.Repository.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,6 +20,8 @@ public class PortfolioService {
     private OpenPositionRepository openPositionRepository;
     @Autowired
     private ClosedPositionRepository closedPositionRepository;
+    @Autowired
+    private CryptocurrencyRepository cryptocurrencyRepository;
     @Autowired
     private TradeRepository tradeRepository;
     @Autowired
@@ -53,6 +52,7 @@ public class PortfolioService {
                     Double averageCostBasis = t.getTotal() /t.getAmount();
                     OpenPosition openPosition = OpenPosition.builder()
                             .symbol(tradingPair.getBaseAsset())
+                            .cmcId(cryptocurrencyRepository.findByCurrency(tradingPair.getBaseAsset()).getCmcId())
                             .currentPrice(currentPrice)
                             .date(trades.get(0).getDate())
                             .deposit(t.getTotal())
@@ -119,7 +119,7 @@ public class PortfolioService {
     }
 
     public List<OpenPosition> getOpenPositions(){
-        binanceService.getAllBaseAssets();
+        //binanceService.getAllBaseAssets();
         return openPositionRepository.findAllByOrderBySymbol();
     }
 

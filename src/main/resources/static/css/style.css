@@ -1,3 +1,15 @@
 .validationError{
     color: #ED4337;
 }
+
+.coin-logo{
+    float: left;
+    width: 20%;
+    height: 20%;
+    border-radius: 50%;
+    box-shadow: 1px 1px 5px black;
+}
+
+.symbol{
+    float: right;
+}
