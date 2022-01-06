@@ -1,6 +1,7 @@
 package hu.portfoliotracker.Controller;
 
 import hu.portfoliotracker.Model.Trade;
+import hu.portfoliotracker.Service.CoinMarketCapService;
 import hu.portfoliotracker.Service.CsvService;
 import hu.portfoliotracker.Service.TradeService;
 import lombok.SneakyThrows;
@@ -24,12 +25,16 @@ public class TradeController {
     @Autowired
     private CsvService csvService;
 
+    @Autowired
+    private CoinMarketCapService coinMarketCapService;
+
 
     @GetMapping
     @SneakyThrows
     public String listOfTrades(Model model) {
         model.addAttribute("trades", tradeService.getTrades());
         model.addAttribute("currency", "$");
+        //coinMarketCapService.testCoinMarketCapApi();
         return "trade-history";
     }
 

@@ -7,7 +7,6 @@ import com.binance.api.client.domain.account.Trade;
 import com.binance.api.client.domain.market.TickerStatistics;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import hu.portfoliotracker.Enum.CURRENCY_PAIR;
 import hu.portfoliotracker.Model.Cryptocurrency;
 import hu.portfoliotracker.Model.TradingPair;
 import hu.portfoliotracker.Repository.CryptocurrencyRepository;
@@ -51,7 +50,7 @@ public class BinanceService {
     }
 
     @SneakyThrows
-    public void initBaseAssets() {
+    public JsonNode getAllSymbolData() {
         RestTemplate restTemplate = new RestTemplate();
         String binanceExchangeInfo = "https://api.binance.com/api/v3/exchangeInfo";
         ResponseEntity<String> response = restTemplate.getForEntity(binanceExchangeInfo, String.class);
@@ -59,25 +58,8 @@ public class BinanceService {
         ObjectMapper mapper = new ObjectMapper();
         JsonNode root = mapper.readTree(response.getBody());
         JsonNode symbols = root.path("symbols");
-        HashSet<Cryptocurrency> cryptocurrencies = new HashSet<>();
-        HashSet<TradingPair> tradingPairs = new HashSet<>();
 
-        for (JsonNode jsonNode : symbols) {
-
-            TradingPair tradingPair = new TradingPair();
-            tradingPair.setSymbol(jsonNode.get("symbol").asText());
-            tradingPair.setStatus(jsonNode.get("status").asText());
-            tradingPair.setBaseAsset(jsonNode.get("baseAsset").asText());
-            tradingPair.setQuoteAsset(jsonNode.get("quoteAsset").asText());
-            tradingPairs.add(tradingPair);
-
-            Cryptocurrency cryptocurrency = new Cryptocurrency();
-            cryptocurrency.setCurrency(jsonNode.get("baseAsset").asText());
-            cryptocurrencies.add(cryptocurrency);
-            log.info(tradingPair.toString());
-        }
-        tradingPairRepository.saveAll(tradingPairs);
-        cryptocurrencyRepository.saveAll(cryptocurrencies);
+        return symbols;
     }
 
     @SneakyThrows

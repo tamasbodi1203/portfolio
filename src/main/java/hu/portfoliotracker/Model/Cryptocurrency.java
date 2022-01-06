@@ -13,10 +13,11 @@ public class Cryptocurrency {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
+    @Column(name = "CMC_ID")
+    private Long cmcId;
+
     @Column(name = "CURRENCY")
     //@Enumerated(EnumType.STRING)
     private String currency;
 
-    @Column(name = "CURRENT_PRICE")
-    private double currentPrice;
 }

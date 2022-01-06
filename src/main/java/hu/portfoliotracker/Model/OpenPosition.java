@@ -24,18 +24,28 @@ public class OpenPosition {
     @Column(name = "SYMBOL")
     //@Enumerated(EnumType.STRING)
     private String symbol;
+
+    @Column(name = "CMC_ID")
+    private Long cmcId;
+
     @Column(name = "CURRENT_PRICE")
     private double currentPrice;
+
     @Column(name = "DATE")
     private LocalDateTime date;
+
     @Column(name = "DEPOSIT")
     private double deposit;
+
     @Column(name = "QUANTITY")
     private double quantity;
+
     @Column(name = "AVERAGE_COST_BASIS")
     private double averageCostBasis;
+
     @Column(name = "MARKET_VALUE")
     private double marketValue;
+
     @Column(name = "PROFIT")
     private double profit;
 }

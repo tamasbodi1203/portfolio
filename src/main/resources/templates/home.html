@@ -21,7 +21,15 @@
         </thead>
         <tbody>
         <tr th:each="openPosition: ${openPositions}">
-            <td th:text="${openPosition.symbol}"></td>
+            <td>
+                <div>
+                    <img class="coin-logo" th:src="@{${'/images/currencies/' + openPosition.cmcId + '.png'}}">
+
+                    <div>
+                        <p class="symbol" th:text="${openPosition.symbol}"></p>
+                    </div>
+                </div>
+            </td>
             <td th:text="${currency} + ${openPosition.currentPrice}"></td>
             <td th:text="${#temporals.format(openPosition.date, 'yyyy-MM-dd HH:mm:ss')}"></td>
             <td th:text="${currency} + ${#numbers.formatDecimal(openPosition.deposit,1,2)}"></td>

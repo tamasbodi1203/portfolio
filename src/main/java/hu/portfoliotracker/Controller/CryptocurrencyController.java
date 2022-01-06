@@ -1,6 +1,6 @@
 package hu.portfoliotracker.Controller;
 
-import hu.portfoliotracker.Service.BinanceService;
+import hu.portfoliotracker.Service.CryptocurrencyService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -13,12 +13,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class CryptocurrencyController {
 
     @Autowired
-    BinanceService binanceService;
+    CryptocurrencyService cryptocurrencyService;
 
     @GetMapping("/init")
     public void initCryptocurrencies() {
         long startTime = System.nanoTime();
-        binanceService.initBaseAssets();
+        cryptocurrencyService.initBaseAssets();
         long stopTime = System.nanoTime();
         long elpasedTime = stopTime - startTime;
         //ArrayList, darabonként mentéssel: 78s
