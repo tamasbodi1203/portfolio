@@ -10,6 +10,7 @@
         <thead>
         <tr>
             <th scope="col">Date</th>
+            <th scope="col">Trading type</th>
             <th scope="col">Pair</th>
             <th scope="col">Side</th>
             <th scope="col">Price</th>
@@ -21,6 +22,7 @@
         <tbody>
         <tr th:each="trade: ${trades}">
             <td th:text="${#temporals.format(trade.date, 'yyyy-MM-dd HH:mm:ss')}"></td>
+            <td th:text="${trade.tradingType}"></td>
             <td th:text="${trade.pair}"></td>
             <td th:text="${trade.side}"></td>
             <td th:text="${currency} + ${#numbers.formatDecimal(trade.price,1,4)}"></td>

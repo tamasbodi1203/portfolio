@@ -1,5 +1,6 @@
 package hu.portfoliotracker.Controller;
 
+import hu.portfoliotracker.Enum.TRADING_TYPE;
 import hu.portfoliotracker.Model.Trade;
 import hu.portfoliotracker.Service.CoinMarketCapService;
 import hu.portfoliotracker.Service.CsvService;
@@ -99,8 +100,8 @@ public class TradeController {
 
 
     @RequestMapping(value = "/import", method=RequestMethod.POST, params="action=import")
-    public String importFile(@RequestParam("file") MultipartFile file) {
-        csvService.save(file);
+    public String importFile(@RequestParam("file") MultipartFile file, @RequestParam ("type") TRADING_TYPE tradingType) {
+        csvService.save(file, tradingType);
         return "redirect:/trade-history";
     }
 
