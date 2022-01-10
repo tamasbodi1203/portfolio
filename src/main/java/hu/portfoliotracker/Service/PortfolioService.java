@@ -1,5 +1,8 @@
 package hu.portfoliotracker.Service;
 
+import hu.portfoliotracker.DTO.ClosedPositionDto;
+import hu.portfoliotracker.DTO.OpenPositionDto;
+import hu.portfoliotracker.DTO.PortfolioDto;
 import hu.portfoliotracker.Enum.TRADING_TYPE;
 import hu.portfoliotracker.Model.ClosedPosition;
 import hu.portfoliotracker.Model.OpenPosition;
@@ -7,9 +10,11 @@ import hu.portfoliotracker.Model.Trade;
 import hu.portfoliotracker.Model.TradingPair;
 import hu.portfoliotracker.Repository.*;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -34,11 +39,6 @@ public class PortfolioService {
     public void initPositions(TRADING_TYPE tradingType) {
         System.out.println("Execute method asynchronously. "
                 + Thread.currentThread().getName());
-
-        // Töröljük minden futtatáskor a már meglévő pozíciókat, hogy ne duplikálódjanak
-        openPositionRepository.deleteAll();
-        closedPositionRepository.deleteAll();
-        //List<Trade> trades = tradeRepository.findAllByOrderByDate();
         // Kereskedési típus alapján elkülönítjük a kereskedéseket
         List<Trade> trades = tradeRepository.findByTradingTypeOrderByOrderByDate(tradingType);
         Iterator<Trade> iterator = trades.iterator();
@@ -48,43 +48,38 @@ public class PortfolioService {
             String baseAsset = tradingPair.getBaseAsset();
             // Vétel
             if (t.getSide().equals("BUY")){
-                Double currentPrice = binanceService.getLastPrice(baseAsset + "USDT");
+                //Double currentPrice = binanceService.getLastPrice(baseAsset + "USDT");
 
                 // Megnézzük, hogy létezik-e már nyitott számla az adott kriptovalutával ha nem, akkor nyitunk egyet
-                if (openPositionRepository.countBySymbol(baseAsset) == 0L) {
+                if (openPositionRepository.countBySymbolAndTradingType(baseAsset, tradingType) == 0L) {
                     Double averageCostBasis = t.getTotal() /t.getAmount();
                     OpenPosition openPosition = OpenPosition.builder()
                             .symbol(tradingPair.getBaseAsset())
                             .cmcId(cryptocurrencyRepository.findByCurrency(tradingPair.getBaseAsset()).getCmcId())
-                            .currentPrice(currentPrice)
                             .date(trades.get(0).getDate())
                             .deposit(t.getTotal())
                             .quantity(t.getAmount())
                             .averageCostBasis(averageCostBasis)
-                            .marketValue(t.getAmount() * currentPrice)
-                            .profit((currentPrice - averageCostBasis) * t.getAmount())
+                            .tradingType(tradingType)
                             .build();
 
                     saveOpenPosition(openPosition);
                 } else {
-                    OpenPosition openPosition = openPositionRepository.findBySymbol(baseAsset);
+                    OpenPosition openPosition = openPositionRepository.findBySymbolAndTradingType(baseAsset, tradingType);
                     Double deposit = openPosition.getDeposit() + t.getTotal();
                     Double quantity = openPosition.getQuantity() + t.getAmount();
                     Double averageCostBasis = deposit / quantity;
 
-                    openPosition.setCurrentPrice(currentPrice);
                     openPosition.setDeposit(deposit);
                     openPosition.setQuantity(quantity);
                     openPosition.setAverageCostBasis(averageCostBasis);
-                    openPosition.setMarketValue(quantity * currentPrice);
-                    openPosition.setProfit((currentPrice - averageCostBasis) * quantity);
                     saveOpenPosition(openPosition);
 
                 }
 
                 // Eladás
             } else {
-                OpenPosition openPosition = openPositionRepository.findBySymbol(baseAsset);
+                OpenPosition openPosition = openPositionRepository.findBySymbolAndTradingType(baseAsset, tradingType);
                 Double averageCostBasis = openPosition.getAverageCostBasis();
 
                 ClosedPosition closedPosition = ClosedPosition.builder()
@@ -95,7 +90,7 @@ public class PortfolioService {
                         .quantity(t.getAmount())
                         .averageCostBasis(averageCostBasis)
                         .marketValue(t.getAmount() * t.getPrice())
-                        .profit(t.getAmount() * (t.getPrice() - averageCostBasis))
+                        .tradingType(tradingType)
                         .build();
 
                 saveClosedPosition(closedPosition);
@@ -111,6 +106,12 @@ public class PortfolioService {
         }
     }
 
+    public void deleteAll(){
+        openPositionRepository.deleteAll();
+        closedPositionRepository.deleteAll();
+        log.info("Nyitott és zárt pozíciók törölve");
+    }
+
     public void saveOpenPosition(OpenPosition openPosition){
         openPositionRepository.save(openPosition);
         log.info("Open position added: " + openPosition.toString());
@@ -123,11 +124,75 @@ public class PortfolioService {
 
     public List<OpenPosition> getOpenPositions(TRADING_TYPE tradingType){
         //binanceService.getAllBaseAssets();
-        return openPositionRepository.findAllByOrderBySymbol();
+        return openPositionRepository.findAllByTradingType(tradingType);
     }
 
     public List<ClosedPosition> getClosedPositions(TRADING_TYPE tradingType){
-        return closedPositionRepository.findAllByOrderBySymbolDate();
+        return closedPositionRepository.findAllByTradingType(tradingType);
+    }
+
+    public PortfolioDto getPortfolioDto(TRADING_TYPE tradingType) {
+        val openPositionDtos = new ArrayList<OpenPositionDto>();
+        val closedPositionDtos = new ArrayList<ClosedPositionDto>();
+        val openPositions = getOpenPositions(tradingType);
+        val closedPositions = getClosedPositions(tradingType);
+        Double totalOpenDeposit = Double.valueOf(0);
+        Double totalUnrealizedGains = Double.valueOf(0);
+        Double totalClosedDeposit = Double.valueOf(0);
+        Double totalRealizedGains = Double.valueOf(0);
+        for (val openPosition : openPositions) {
+            val currentPrice = binanceService.getLastPrice(openPosition.getSymbol() + "USDT");
+            val unrealizedGains = (currentPrice - openPosition.getAverageCostBasis()) * openPosition.getQuantity();
+            val openPositionDto = OpenPositionDto.builder()
+                    .symbol(openPosition.getSymbol())
+                    .cmcId(openPosition.getCmcId())
+                    .currentPrice(currentPrice)
+                    .date(openPosition.getDate())
+                    .deposit(openPosition.getDeposit())
+                    .quantity(openPosition.getQuantity())
+                    .averageCostBasis(openPosition.getAverageCostBasis())
+                    .marketValue(openPosition.getQuantity() * currentPrice)
+                    .unrealizedGains(unrealizedGains)
+                    //TODO: 0-val való osztás lekezelése
+                    .unrealizedGainsPercent(unrealizedGains / (openPosition.getQuantity() * openPosition.getAverageCostBasis()))
+                    .tradingType(tradingType)
+                    .build();
+
+            openPositionDtos.add(openPositionDto);
+            totalOpenDeposit += openPositionDto.getDeposit();
+            totalUnrealizedGains += openPositionDto.getUnrealizedGains();
+        }
+        for (val closedPosition : closedPositions) {
+            val realizedGains = closedPosition.getQuantity() * (closedPosition.getSellPrice() - closedPosition.getAverageCostBasis());
+            val closedPositionDto = ClosedPositionDto.builder()
+                    .symbol(closedPosition.getSymbol())
+                    .date(closedPosition.getDate())
+                    .sellPrice(closedPosition.getSellPrice())
+                    .deposit(closedPosition.getDeposit())
+                    .quantity(closedPosition.getQuantity())
+                    .averageCostBasis(closedPosition.getAverageCostBasis())
+                    .marketValue(closedPosition.getMarketValue())
+                    .realizedGains(realizedGains)
+                    .realizedGainsPercent(realizedGains / closedPosition.getDeposit())
+                    .tradingType(tradingType)
+                    .build();
+
+            totalClosedDeposit += closedPosition.getDeposit();
+            closedPositionDtos.add(closedPositionDto);
+            totalRealizedGains += closedPositionDto.getRealizedGains();
+        }
+
+        val portfolioDto = PortfolioDto.builder()
+                .openPositionDtos(openPositionDtos)
+                .closedPositionDtos(closedPositionDtos)
+                .totalDeposit(totalOpenDeposit)
+                .totalUnrealizedGains(totalUnrealizedGains)
+                .totalUnrealizedGainsPercent(totalUnrealizedGains / totalOpenDeposit)
+                .totalRealizedGains(totalRealizedGains)
+                .totalRealizedGainsPercent(totalRealizedGains / totalClosedDeposit)
+                .build();
+
+        return portfolioDto;
     }
 
 }
