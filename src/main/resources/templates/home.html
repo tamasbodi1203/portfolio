@@ -4,7 +4,7 @@
 <body>
 
 <div th:replace="fragments/menu :: menu (current='Portfolio')"></div>
-
+<!--Spot-->
 <div class="container">
     <table class="table">
         <thead>
@@ -20,7 +20,7 @@
         </tr>
         </thead>
         <tbody>
-        <tr th:each="openPosition: ${openPositions}">
+        <tr th:each="openPosition: ${spotOpenPositions}">
             <td>
                 <div>
                     <img class="coin-logo" th:src="@{${'/images/currencies/' + openPosition.cmcId + '.png'}}">
@@ -56,7 +56,7 @@
         </tr>
         </thead>
         <tbody>
-        <tr th:each="closedPosition: ${closedPositions}">
+        <tr th:each="closedPosition: ${spotClosedPositions}">
             <td th:text="${closedPosition.symbol}"></td>
             <td th:text="${currency} + ${closedPosition.sellPrice}"></td>
             <td th:text="${#temporals.format(closedPosition.date, 'yyyy-MM-dd HH:mm:ss')}"></td>
@@ -69,6 +69,135 @@
         </tbody>
     </table>
 </div>
+<!--Cross margin-->
+<div class="container">
+    <table class="table">
+        <thead>
+        <tr>
+            <th scope="col">Symbol</th>
+            <th scope="col">Current Price</th>
+            <th scope="col">Opening Date</th>
+            <th scope="col">Deposit</th>
+            <th scope="col">Quantity</th>
+            <th scope="col">Average cost basis</th>
+            <th scope="col">Market Value</th>
+            <th scope="col">Unrealized Gains</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="openPosition: ${crossOpenPositions}">
+            <td>
+                <div>
+                    <img class="coin-logo" th:src="@{${'/images/currencies/' + openPosition.cmcId + '.png'}}">
 
+                    <div>
+                        <p class="symbol" th:text="${openPosition.symbol}"></p>
+                    </div>
+                </div>
+            </td>
+            <td th:text="${currency} + ${openPosition.currentPrice}"></td>
+            <td th:text="${#temporals.format(openPosition.date, 'yyyy-MM-dd HH:mm:ss')}"></td>
+            <td th:text="${currency} + ${#numbers.formatDecimal(openPosition.deposit,1,2)}"></td>
+            <td th:text="${#numbers.formatDecimal(openPosition.quantity,1,4)}"></td>
+            <td th:text="${currency} + ${#numbers.formatDecimal(openPosition.averageCostBasis,1,2)}"></td>
+            <td th:text="${currency} + ${#numbers.formatDecimal(openPosition.marketValue,1,2)}"></td>
+            <td th:text="${currency} + ${#numbers.formatDecimal(openPosition.profit,1,2)}"></td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+<div class="container">
+    <table class="table">
+        <thead>
+        <tr>
+            <th scope="col">Symbol</th>
+            <th scope="col">Sell Price</th>
+            <th scope="col">Closing Date</th>
+            <th scope="col">Deposit</th>
+            <th scope="col">Quantity</th>
+            <th scope="col">Average cost basis</th>
+            <th scope="col">Market Value</th>
+            <th scope="col">Realized Gains</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="closedPosition: ${crossClosedPositions}">
+            <td th:text="${closedPosition.symbol}"></td>
+            <td th:text="${currency} + ${closedPosition.sellPrice}"></td>
+            <td th:text="${#temporals.format(closedPosition.date, 'yyyy-MM-dd HH:mm:ss')}"></td>
+            <td th:text="${currency} + ${#numbers.formatDecimal(closedPosition.deposit,1,2)}"></td>
+            <td th:text="${#numbers.formatDecimal(closedPosition.quantity,1,4)}"></td>
+            <td th:text="${currency} + ${#numbers.formatDecimal(closedPosition.averageCostBasis,1,2)}"></td>
+            <td th:text="${currency} + ${#numbers.formatDecimal(closedPosition.marketValue,1,2)}"></td>
+            <td th:text="${currency} + ${#numbers.formatDecimal(closedPosition.profit,1,2)}"></td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+<!--Isolated margin-->
+<div class="container">
+    <table class="table">
+        <thead>
+        <tr>
+            <th scope="col">Symbol</th>
+            <th scope="col">Current Price</th>
+            <th scope="col">Opening Date</th>
+            <th scope="col">Deposit</th>
+            <th scope="col">Quantity</th>
+            <th scope="col">Average cost basis</th>
+            <th scope="col">Market Value</th>
+            <th scope="col">Unrealized Gains</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="openPosition: ${isolatedOpenPositions}">
+            <td>
+                <div>
+                    <img class="coin-logo" th:src="@{${'/images/currencies/' + openPosition.cmcId + '.png'}}">
+
+                    <div>
+                        <p class="symbol" th:text="${openPosition.symbol}"></p>
+                    </div>
+                </div>
+            </td>
+            <td th:text="${currency} + ${openPosition.currentPrice}"></td>
+            <td th:text="${#temporals.format(openPosition.date, 'yyyy-MM-dd HH:mm:ss')}"></td>
+            <td th:text="${currency} + ${#numbers.formatDecimal(openPosition.deposit,1,2)}"></td>
+            <td th:text="${#numbers.formatDecimal(openPosition.quantity,1,4)}"></td>
+            <td th:text="${currency} + ${#numbers.formatDecimal(openPosition.averageCostBasis,1,2)}"></td>
+            <td th:text="${currency} + ${#numbers.formatDecimal(openPosition.marketValue,1,2)}"></td>
+            <td th:text="${currency} + ${#numbers.formatDecimal(openPosition.profit,1,2)}"></td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+<div class="container">
+    <table class="table">
+        <thead>
+        <tr>
+            <th scope="col">Symbol</th>
+            <th scope="col">Sell Price</th>
+            <th scope="col">Closing Date</th>
+            <th scope="col">Deposit</th>
+            <th scope="col">Quantity</th>
+            <th scope="col">Average cost basis</th>
+            <th scope="col">Market Value</th>
+            <th scope="col">Realized Gains</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="closedPosition: ${isolatedClosedPositions}">
+            <td th:text="${closedPosition.symbol}"></td>
+            <td th:text="${currency} + ${closedPosition.sellPrice}"></td>
+            <td th:text="${#temporals.format(closedPosition.date, 'yyyy-MM-dd HH:mm:ss')}"></td>
+            <td th:text="${currency} + ${#numbers.formatDecimal(closedPosition.deposit,1,2)}"></td>
+            <td th:text="${#numbers.formatDecimal(closedPosition.quantity,1,4)}"></td>
+            <td th:text="${currency} + ${#numbers.formatDecimal(closedPosition.averageCostBasis,1,2)}"></td>
+            <td th:text="${currency} + ${#numbers.formatDecimal(closedPosition.marketValue,1,2)}"></td>
+            <td th:text="${currency} + ${#numbers.formatDecimal(closedPosition.profit,1,2)}"></td>
+        </tr>
+        </tbody>
+    </table>
+</div>
 </body>
 </html>

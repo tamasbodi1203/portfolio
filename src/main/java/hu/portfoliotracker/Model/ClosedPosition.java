@@ -1,7 +1,5 @@
 package hu.portfoliotracker.Model;
 
-import hu.portfoliotracker.Enum.CURRENCY;
-import hu.portfoliotracker.Enum.CURRENCY_PAIR;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

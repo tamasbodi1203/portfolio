@@ -1,5 +1,6 @@
 package hu.portfoliotracker.Service;
 
+import hu.portfoliotracker.Enum.TRADING_TYPE;
 import hu.portfoliotracker.Model.Trade;
 import hu.portfoliotracker.Repository.TradeRepository;
 import hu.portfoliotracker.Utility.CSVHelper;
@@ -29,9 +30,9 @@ public class CsvService {
         return multipartFile;
     }
 
-    public void save(MultipartFile file) {
+    public void save(MultipartFile file, TRADING_TYPE tradingType) {
         try {
-            List<Trade> trades = CSVHelper.csvToTrades(file.getInputStream());
+            List<Trade> trades = CSVHelper.csvToTrades(file.getInputStream(), tradingType);
             for (Trade t: trades) {
                 log.info(t.toString());
             }

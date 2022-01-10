@@ -1,6 +1,6 @@
 package hu.portfoliotracker.Model;
 
-import hu.portfoliotracker.Enum.CURRENCY_PAIR;
+import hu.portfoliotracker.Enum.TRADING_TYPE;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -46,5 +46,9 @@ public class Trade {
 
     @Column(name = "TOTAL", nullable = false)
     private double total;
+
+    @Column(name = "TRADING_TYPE", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private TRADING_TYPE tradingType;
 
 }

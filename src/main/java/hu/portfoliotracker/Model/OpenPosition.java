@@ -1,7 +1,6 @@
 package hu.portfoliotracker.Model;
 
-import hu.portfoliotracker.Enum.CURRENCY;
-import hu.portfoliotracker.Enum.CURRENCY_PAIR;
+import hu.portfoliotracker.Enum.TRADING_TYPE;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -21,8 +20,8 @@ public class OpenPosition {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
+
     @Column(name = "SYMBOL")
-    //@Enumerated(EnumType.STRING)
     private String symbol;
 
     @Column(name = "CMC_ID")
@@ -48,4 +47,8 @@ public class OpenPosition {
 
     @Column(name = "PROFIT")
     private double profit;
+
+    @Column(name = "TRADING_TYPE")
+    @Enumerated(EnumType.STRING)
+    private TRADING_TYPE tradingType;
 }

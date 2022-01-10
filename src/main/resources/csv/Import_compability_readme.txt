@@ -1,0 +1,1 @@
+A .xlsx fájlokat .csv (pontosvesszővel elválasztva) formátumban kell elmenteni, majd a cellákat megfelelően átalakítani, pl. dátumnál az egyedi formázás yyyy-mm-dd hh:mm:ss legyen.

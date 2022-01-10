@@ -1,6 +1,6 @@
 package hu.portfoliotracker.Utility;
 
-import hu.portfoliotracker.Enum.CURRENCY_PAIR;
+import hu.portfoliotracker.Enum.TRADING_TYPE;
 import hu.portfoliotracker.Model.Trade;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
@@ -30,7 +30,7 @@ public class CSVHelper {
         return true;
     }
 
-    public static List<Trade> csvToTrades(InputStream is) {
+    public static List<Trade> csvToTrades(InputStream is, TRADING_TYPE tradingType) {
         try (BufferedReader fileReader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
              CSVParser csvParser = new CSVParser(fileReader,
                      CSVFormat.DEFAULT.withFirstRecordAsHeader().withIgnoreHeaderCase().withTrim());) {
@@ -47,6 +47,7 @@ public class CSVHelper {
                         .price(Double.parseDouble(csvRecord.get("Price")))
                         .amount(Double.parseDouble(csvRecord.get("Amount")))
                         .total(Double.parseDouble(csvRecord.get("Total")))
+                        .tradingType(tradingType)
                         .build();
 
                 trades.add(trade);

@@ -1,5 +1,6 @@
 package hu.portfoliotracker.Service;
 
+import hu.portfoliotracker.Enum.TRADING_TYPE;
 import hu.portfoliotracker.Model.ClosedPosition;
 import hu.portfoliotracker.Model.OpenPosition;
 import hu.portfoliotracker.Model.Trade;
@@ -30,14 +31,16 @@ public class PortfolioService {
     TradingPairRepository tradingPairRepository;
 
     //@Async("threadPoolTaskExecutor")
-    public void initPositions() {
+    public void initPositions(TRADING_TYPE tradingType) {
         System.out.println("Execute method asynchronously. "
                 + Thread.currentThread().getName());
 
         // Töröljük minden futtatáskor a már meglévő pozíciókat, hogy ne duplikálódjanak
         openPositionRepository.deleteAll();
         closedPositionRepository.deleteAll();
-        List<Trade> trades = tradeRepository.findAllByOrderByDate();
+        //List<Trade> trades = tradeRepository.findAllByOrderByDate();
+        // Kereskedési típus alapján elkülönítjük a kereskedéseket
+        List<Trade> trades = tradeRepository.findByTradingTypeOrderByOrderByDate(tradingType);
         Iterator<Trade> iterator = trades.iterator();
         while (iterator.hasNext()) {
             Trade t = iterator.next();
@@ -118,12 +121,12 @@ public class PortfolioService {
         log.info("Closed position added: " + closedPosition.toString());
     }
 
-    public List<OpenPosition> getOpenPositions(){
+    public List<OpenPosition> getOpenPositions(TRADING_TYPE tradingType){
         //binanceService.getAllBaseAssets();
         return openPositionRepository.findAllByOrderBySymbol();
     }
 
-    public List<ClosedPosition> getClosedPositions(){
+    public List<ClosedPosition> getClosedPositions(TRADING_TYPE tradingType){
         return closedPositionRepository.findAllByOrderBySymbolDate();
     }
 
