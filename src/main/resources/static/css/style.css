@@ -13,3 +13,26 @@
 .symbol{
     float: right;
 }
+
+.table {
+  border: 1px solid black;
+}
+
+.title {
+    font-size: 150%;
+    background-color: #278BF5;
+    color: white;
+    text-align: center;
+}
+
+.header {
+    text-align: center;
+}
+
+.positive {
+    color: green;
+}
+
+.negative {
+    color: red;
+}
