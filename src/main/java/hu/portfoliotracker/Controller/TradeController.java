@@ -4,6 +4,7 @@ import hu.portfoliotracker.Enum.TRADING_TYPE;
 import hu.portfoliotracker.Model.Trade;
 import hu.portfoliotracker.Service.CoinMarketCapService;
 import hu.portfoliotracker.Service.CsvService;
+import hu.portfoliotracker.Service.PortfolioService;
 import hu.portfoliotracker.Service.TradeService;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +31,8 @@ public class TradeController {
     @Autowired
     private CoinMarketCapService coinMarketCapService;
 
+    @Autowired
+    private PortfolioService portfolioService;
 
     @GetMapping
     @SneakyThrows
@@ -72,6 +75,7 @@ public class TradeController {
         }
         trade.setDate(LocalDateTime.now()); //TODO: dátum mokkolást kivenni
         tradeService.saveTrade(trade);
+        portfolioService.initBalances();
         return "redirect:/trade-history";
     }
 
@@ -79,6 +83,7 @@ public class TradeController {
     @GetMapping("/delete/{id}")
     public String deleteTrade(@PathVariable long id){
         tradeService.deleteTrade(id);
+        portfolioService.initBalances();
         return "redirect:/trade-history";
     }
 
@@ -100,6 +105,7 @@ public class TradeController {
         }
         trade.setDate(LocalDateTime.now()); //TODO: dátum mokkolást kivenni
         tradeService.saveTrade(trade);
+        portfolioService.initBalances();
         return "redirect:/trade-history";
     }
 
@@ -113,6 +119,7 @@ public class TradeController {
     @RequestMapping(value = "/import", method=RequestMethod.POST, params="action=import")
     public String importFile(@RequestParam("file") MultipartFile file, @RequestParam ("type") TRADING_TYPE tradingType) {
         csvService.save(file, tradingType);
+        portfolioService.initBalances();
         return "redirect:/trade-history";
     }
 

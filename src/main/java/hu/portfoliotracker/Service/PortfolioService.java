@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
@@ -106,6 +107,16 @@ public class PortfolioService {
         }
     }
 
+    public void initBalances() {
+
+        // Töröljük minden futtatáskor a már meglévő pozíciókat, hogy ne duplikálódjanak
+        deleteAll();
+        initPositions(TRADING_TYPE.SPOT);
+        initPositions(TRADING_TYPE.CROSS);
+        initPositions(TRADING_TYPE.ISOLATED);
+
+    }
+
     public void deleteAll(){
         openPositionRepository.deleteAll();
         closedPositionRepository.deleteAll();
@@ -132,6 +143,9 @@ public class PortfolioService {
     }
 
     public PortfolioDto getPortfolioDto(TRADING_TYPE tradingType) {
+        log.info("Árfolyamok frissítése");
+        // Ha már lekérdeztük az árfolyamot egy korábbi pozíciónál, akkor ne kérjük le újra
+        HashMap<String, Double> priceMap = new HashMap<>();
         val openPositionDtos = new ArrayList<OpenPositionDto>();
         val closedPositionDtos = new ArrayList<ClosedPositionDto>();
         val openPositions = getOpenPositions(tradingType);
