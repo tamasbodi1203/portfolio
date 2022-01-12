@@ -1,6 +1,5 @@
 package hu.portfoliotracker.Controller;
 
-import hu.portfoliotracker.Enum.TRADING_TYPE;
 import hu.portfoliotracker.Service.PortfolioService;
 import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,17 +16,11 @@ public class PortfolioController {
     @GetMapping
     public String listOfPositions(Model model) {
 
-        //Spot
-        val spotPortfolioDto = portfolioService.getPortfolioDto(TRADING_TYPE.SPOT);
-        model.addAttribute("spotPortfolioDto", spotPortfolioDto);
 
-        // Cross margin
-        val crossPortfolioDto = portfolioService.getPortfolioDto(TRADING_TYPE.CROSS);
-        model.addAttribute("crossPortfolioDto", crossPortfolioDto);
-
-        // Isolated margin
-        val isolatedPortfolioDto = portfolioService.getPortfolioDto(TRADING_TYPE.ISOLATED);
-        model.addAttribute("isolatedPortfolioDto", isolatedPortfolioDto);
+        val portfolioDtos = portfolioService.refreshPortfolio();
+        model.addAttribute("spotBalanceDto", portfolioDtos.get(0));
+        model.addAttribute("crossBalanceDto", portfolioDtos.get(1));
+        model.addAttribute("isolatedBalanceDto", portfolioDtos.get(2));
 
         model.addAttribute("currency", "$");
         return "home";

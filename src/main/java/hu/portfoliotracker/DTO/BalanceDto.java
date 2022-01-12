@@ -11,7 +11,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-public class PortfolioDto {
+public class BalanceDto {
 
     private List<OpenPositionDto> openPositionDtos;
 
