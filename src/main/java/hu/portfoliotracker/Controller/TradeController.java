@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
+import java.time.LocalDateTime;
 
 @Controller
 @RequestMapping("/trade-history")
@@ -55,21 +56,26 @@ public class TradeController {
         return "trade-history";
     }
 
+    // Hozzáadás
     @GetMapping("/add")
-    public String showTradeCreateForm(Trade trade) {
+    public String showTradeCreateForm(Model model, Trade trade) {
+
+        model.addAttribute("tradingPairs", tradeService.getAllTradingPairs());
         return "trade-create";
     }
 
     @PostMapping("/add")
-    public String createTrade(@Valid Trade trade, BindingResult result) {
+    public String createTrade(Model model, @Valid Trade trade, BindingResult result) {
         if (result.hasErrors()) {
+            model.addAttribute("tradingPairs", tradeService.getAllTradingPairs());
             return "trade-create";
         }
+        trade.setDate(LocalDateTime.now()); //TODO: dátum mokkolást kivenni
         tradeService.saveTrade(trade);
         return "redirect:/trade-history";
     }
 
-
+    // Törlés
     @GetMapping("/delete/{id}")
     public String deleteTrade(@PathVariable long id){
         tradeService.deleteTrade(id);
@@ -77,22 +83,27 @@ public class TradeController {
     }
 
 
+    // Módosítás
     @GetMapping("/edit/{id}")
-    public String editTradeForm(@PathVariable long id, Model model){
+    public String editTradeForm(Model model, @PathVariable long id){
         Trade trade = tradeService.getTradeById(id);
+        model.addAttribute("tradingPairs", tradeService.getAllTradingPairs());
         model.addAttribute("trade", trade);
         return "trade-create";
     }
     
     @PostMapping("/edit/{id}")
-    public String editTrade(@Valid Trade trade, BindingResult result){
+    public String editTrade(Model model, @Valid Trade trade, BindingResult result){
         if (result.hasErrors()) {
+            model.addAttribute("tradingPairs", tradeService.getAllTradingPairs());
             return "trade-create";
         }
+        trade.setDate(LocalDateTime.now()); //TODO: dátum mokkolást kivenni
         tradeService.saveTrade(trade);
         return "redirect:/trade-history";
     }
 
+    // Importálás
     @GetMapping("/import")
     public String importTradesFromCSV() {
         return "trade-import";

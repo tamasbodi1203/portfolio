@@ -24,7 +24,7 @@ public class Trade {
 
     //TODO: Forma validáció szükséges
     @Column(name = "DATE", nullable = false)
-    @NotNull(message = "Dátum megadása kötelező")
+    //@NotNull(message = "Dátum megadása kötelező")
     private LocalDateTime date;
 
     @Column(name = "PAIR", nullable = false)
