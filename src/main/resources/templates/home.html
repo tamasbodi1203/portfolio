@@ -14,8 +14,8 @@
 <!--</form>-->
 <!--Spot-->
 <button id="refresh_button"type="button">Click Me!</button>
-<div class="container" id="replace_div">
-    <table class="table">
+<div class="container" id="refresh_table">
+    <table class="table" id="spotTable">
         <thead>
         <tr>
             <th class="title" colspan="9">
@@ -44,7 +44,7 @@
                     </div>
                 </div>
             </td>
-            <td th:text="${currency} + ${openPosition.currentPrice}"></td>
+            <td th:text="${currency} + ${openPosition.currentPrice}" id="change_this"></td>
             <td th:text="${#temporals.format(openPosition.date, 'yyyy-MM-dd HH:mm:ss')}"></td>
             <td th:text="${currency} + ${#numbers.formatDecimal(openPosition.deposit,1,2)}"></td>
             <td th:text="${#numbers.formatDecimal(openPosition.quantity,1,4)}"></td>
@@ -371,23 +371,38 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
 <script>
         $(document).ready(function () {
+            $('#refresh_button').click(refreshTable);
 
-            //call function when page is loaded
-            //getContent();
-
-            //set on change listener
-            $('#refresh_button').click(refreshPrices);
-
-            setInterval(refreshPrices(), 10000);
+            //setInterval(function() {refreshPrices()}, 60000);
             function refreshPrices() {
 
                 //create url to request fragment
                 var url = /balance/;
                 url = url + "content2";
 
-                console.log(url);
+                //console.log(url);
                 //load fragment and replace content
                 $('#replace_div').load(url);
+            }
+            var price = document.getElementById("spotTable").rows[3].cells[1];
+            console.log(price);
+            function refreshPrice() {
+
+            }
+
+            function changeThis() {
+                var url = /content/
+                url = url + "content3";
+                console.log(url)
+                $('#change_this').html($('#change_this').load(url));
+            }
+
+            function refreshTable() {
+                var url = /content/
+                url = url + "content4";
+                console.log(url)
+                $('#refresh_table').load(url);
+                //$('#refresh_table').replaceWith($('#refresh_table').load(url));
             }
             })
 </script>
