@@ -3,7 +3,7 @@ package hu.portfoliotracker.Service;
 import hu.portfoliotracker.Enum.TRADING_TYPE;
 import hu.portfoliotracker.Model.Trade;
 import hu.portfoliotracker.Repository.TradeRepository;
-import hu.portfoliotracker.Utility.CSVHelper;
+import hu.portfoliotracker.Utility.ImportHelper;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +18,7 @@ import java.util.List;
 
 @Service
 @Slf4j
-public class CsvService {
+public class importService {
 
     @Autowired
     TradeRepository tradeRepository;
@@ -30,15 +30,29 @@ public class CsvService {
         return multipartFile;
     }
 
-    public void save(MultipartFile file, TRADING_TYPE tradingType) {
+    public void saveCsv(MultipartFile file, TRADING_TYPE tradingType) {
         try {
-            List<Trade> trades = CSVHelper.csvToTrades(file.getInputStream(), tradingType);
+            List<Trade> trades = ImportHelper.csvToTrades(file.getInputStream(), tradingType);
             for (Trade t: trades) {
                 log.info(t.toString());
             }
             tradeRepository.saveAll(trades);
         } catch (IOException e) {
-            throw new RuntimeException("fail to store csv data: " + e.getMessage());
+            throw new RuntimeException("Hiba a CSV fájl olvasása során: " + e.getMessage());
+        }
+    }
+
+    public void testXLSXReader() {
+        ImportHelper.testXlsxToTrades();
+    }
+
+    public void saveXlsx(MultipartFile file, TRADING_TYPE tradingType) {
+        try {
+            List<Trade> trades = ImportHelper.xlsxToTrades(file.getInputStream(), tradingType);
+
+            tradeRepository.saveAll(trades);
+        } catch (IOException e) {
+            throw new RuntimeException("Hiba az XLSX fájl olvasása során: " + e.getMessage());
         }
     }
 

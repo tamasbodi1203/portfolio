@@ -13,7 +13,7 @@
 <!--    </button>-->
 <!--</form>-->
 <!--Spot-->
-<button id="refresh_button"type="button">Click Me!</button>
+<!--<button id="refresh_button"type="button">Click Me!</button>-->
 <div class="container" id="refresh_table">
     <table class="table" id="spotTable">
         <thead>
@@ -386,23 +386,24 @@
             }
             var price = document.getElementById("spotTable").rows[3].cells[1];
             console.log(price);
-            function refreshPrice() {
-
-            }
-
-            function changeThis() {
-                var url = /content/
-                url = url + "content3";
-                console.log(url)
-                $('#change_this').html($('#change_this').load(url));
-            }
 
             function refreshTable() {
-                var url = /content/
-                url = url + "content4";
-                console.log(url)
-                $('#refresh_table').load(url);
-                //$('#refresh_table').replaceWith($('#refresh_table').load(url));
+                    $.ajax({
+    			  type: 'get',
+    			  url: /*[[ @{'/url'} ]]*/,
+
+    			  success: function(data){
+
+    				  /*<![CDATA[*/
+
+
+    				  $('.search_list').html(data);
+
+
+    				  /*]]>*/
+    				},
+
+    			})
             }
             })
 </script>

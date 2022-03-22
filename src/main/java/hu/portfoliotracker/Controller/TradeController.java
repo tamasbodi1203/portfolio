@@ -3,7 +3,7 @@ package hu.portfoliotracker.Controller;
 import hu.portfoliotracker.Enum.TRADING_TYPE;
 import hu.portfoliotracker.Model.Trade;
 import hu.portfoliotracker.Service.CoinMarketCapService;
-import hu.portfoliotracker.Service.CsvService;
+import hu.portfoliotracker.Service.importService;
 import hu.portfoliotracker.Service.PortfolioService;
 import hu.portfoliotracker.Service.TradeService;
 import lombok.SneakyThrows;
@@ -26,7 +26,7 @@ public class TradeController {
     private TradeService tradeService;
 
     @Autowired
-    private CsvService csvService;
+    private importService importService;
 
     @Autowired
     private CoinMarketCapService coinMarketCapService;
@@ -116,9 +116,9 @@ public class TradeController {
     }
 
 
-    @RequestMapping(value = "/import", method=RequestMethod.POST, params="action=import")
-    public String importFile(@RequestParam("file") MultipartFile file, @RequestParam ("type") TRADING_TYPE tradingType) {
-        csvService.save(file, tradingType);
+    @RequestMapping(value = "/import", method=RequestMethod.POST, params="action=importCsv")
+    public String importCsv(@RequestParam("file") MultipartFile file, @RequestParam ("type") TRADING_TYPE tradingType) {
+        importService.saveCsv(file, tradingType);
         portfolioService.initBalances();
         return "redirect:/trade-history";
     }
@@ -127,4 +127,12 @@ public class TradeController {
     public String cancelImport() {
         return "redirect:/trade-history";
     }
+
+    @RequestMapping(value = "/import", method=RequestMethod.POST, params="action=importXlsx")
+    public String importXlsx(@RequestParam("file") MultipartFile file, @RequestParam ("type") TRADING_TYPE tradingType) {
+        importService.saveXlsx(file, tradingType);
+        portfolioService.initBalances();
+        return "redirect:/trade-history";
+    }
+
 }

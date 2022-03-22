@@ -14,6 +14,7 @@ import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -37,6 +38,7 @@ public class PortfolioService {
     TradingPairRepository tradingPairRepository;
 
     //@Async("threadPoolTaskExecutor")
+    @Transactional
     public void initPositions(TRADING_TYPE tradingType) {
         System.out.println("Execute method asynchronously. "
                 + Thread.currentThread().getName());
