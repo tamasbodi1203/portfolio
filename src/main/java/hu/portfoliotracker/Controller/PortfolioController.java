@@ -1,41 +1,35 @@
 package hu.portfoliotracker.Controller;
 
-import hu.portfoliotracker.Enum.TRADING_TYPE;
 import hu.portfoliotracker.Service.PortfolioService;
 import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
 public class PortfolioController {
 
     @Autowired
-    private PortfolioService positionService;
+    private PortfolioService portfolioService;
 
     @GetMapping
     public String listOfPositions(Model model) {
 
-        // Töröljük minden futtatáskor a már meglévő pozíciókat, hogy ne duplikálódjanak
-        positionService.deleteAll();
 
-        //Spot
-        positionService.initPositions(TRADING_TYPE.SPOT);
-        val spotPortfolioDto = positionService.getPortfolioDto(TRADING_TYPE.SPOT);
-        model.addAttribute("spotPortfolioDto", spotPortfolioDto);
-
-        // Cross margin
-        positionService.initPositions(TRADING_TYPE.CROSS);
-        val crossPortfolioDto = positionService.getPortfolioDto(TRADING_TYPE.CROSS);
-        model.addAttribute("crossPortfolioDto", crossPortfolioDto);
-
-        // Isolated margin
-        positionService.initPositions(TRADING_TYPE.ISOLATED);
-        val isolatedPortfolioDto = positionService.getPortfolioDto(TRADING_TYPE.ISOLATED);
-        model.addAttribute("isolatedPortfolioDto", isolatedPortfolioDto);
+        val portfolioDtos = portfolioService.refreshPortfolio();
+        model.addAttribute("spotBalanceDto", portfolioDtos.get(0));
+        model.addAttribute("crossBalanceDto", portfolioDtos.get(1));
+        model.addAttribute("isolatedBalanceDto", portfolioDtos.get(2));
 
         model.addAttribute("currency", "$");
         return "home";
     }
+
+    @RequestMapping("content1")
+    public String getContent1() {
+        return "balance :: content1";
+    }
+
 }

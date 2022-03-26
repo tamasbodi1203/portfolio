@@ -3,7 +3,8 @@ package hu.portfoliotracker.Controller;
 import hu.portfoliotracker.Enum.TRADING_TYPE;
 import hu.portfoliotracker.Model.Trade;
 import hu.portfoliotracker.Service.CoinMarketCapService;
-import hu.portfoliotracker.Service.CsvService;
+import hu.portfoliotracker.Service.importService;
+import hu.portfoliotracker.Service.PortfolioService;
 import hu.portfoliotracker.Service.TradeService;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
+import java.time.LocalDateTime;
 
 @Controller
 @RequestMapping("/trade-history")
@@ -24,11 +26,13 @@ public class TradeController {
     private TradeService tradeService;
 
     @Autowired
-    private CsvService csvService;
+    private importService importService;
 
     @Autowired
     private CoinMarketCapService coinMarketCapService;
 
+    @Autowired
+    private PortfolioService portfolioService;
 
     @GetMapping
     @SneakyThrows
@@ -55,53 +59,67 @@ public class TradeController {
         return "trade-history";
     }
 
+    // Hozzáadás
     @GetMapping("/add")
-    public String showTradeCreateForm(Trade trade) {
+    public String showTradeCreateForm(Model model, Trade trade) {
+
+        model.addAttribute("tradingPairs", tradeService.getAllTradingPairs());
         return "trade-create";
     }
 
     @PostMapping("/add")
-    public String createTrade(@Valid Trade trade, BindingResult result) {
+    public String createTrade(Model model, @Valid Trade trade, BindingResult result) {
         if (result.hasErrors()) {
+            model.addAttribute("tradingPairs", tradeService.getAllTradingPairs());
             return "trade-create";
         }
+        trade.setDate(LocalDateTime.now()); //TODO: dátum mokkolást kivenni
         tradeService.saveTrade(trade);
+        portfolioService.initBalances();
         return "redirect:/trade-history";
     }
 
-
+    // Törlés
     @GetMapping("/delete/{id}")
     public String deleteTrade(@PathVariable long id){
         tradeService.deleteTrade(id);
+        portfolioService.initBalances();
         return "redirect:/trade-history";
     }
 
 
+    // Módosítás
     @GetMapping("/edit/{id}")
-    public String editTradeForm(@PathVariable long id, Model model){
+    public String editTradeForm(Model model, @PathVariable long id){
         Trade trade = tradeService.getTradeById(id);
+        model.addAttribute("tradingPairs", tradeService.getAllTradingPairs());
         model.addAttribute("trade", trade);
         return "trade-create";
     }
     
     @PostMapping("/edit/{id}")
-    public String editTrade(@Valid Trade trade, BindingResult result){
+    public String editTrade(Model model, @Valid Trade trade, BindingResult result){
         if (result.hasErrors()) {
+            model.addAttribute("tradingPairs", tradeService.getAllTradingPairs());
             return "trade-create";
         }
+        trade.setDate(LocalDateTime.now()); //TODO: dátum mokkolást kivenni
         tradeService.saveTrade(trade);
+        portfolioService.initBalances();
         return "redirect:/trade-history";
     }
 
+    // Importálás
     @GetMapping("/import")
     public String importTradesFromCSV() {
         return "trade-import";
     }
 
 
-    @RequestMapping(value = "/import", method=RequestMethod.POST, params="action=import")
-    public String importFile(@RequestParam("file") MultipartFile file, @RequestParam ("type") TRADING_TYPE tradingType) {
-        csvService.save(file, tradingType);
+    @RequestMapping(value = "/import", method=RequestMethod.POST, params="action=importCsv")
+    public String importCsv(@RequestParam("file") MultipartFile file, @RequestParam ("type") TRADING_TYPE tradingType) {
+        importService.saveCsv(file, tradingType);
+        portfolioService.initBalances();
         return "redirect:/trade-history";
     }
 
@@ -109,4 +127,12 @@ public class TradeController {
     public String cancelImport() {
         return "redirect:/trade-history";
     }
+
+    @RequestMapping(value = "/import", method=RequestMethod.POST, params="action=importXlsx")
+    public String importXlsx(@RequestParam("file") MultipartFile file, @RequestParam ("type") TRADING_TYPE tradingType) {
+        importService.saveXlsx(file, tradingType);
+        portfolioService.initBalances();
+        return "redirect:/trade-history";
+    }
+
 }

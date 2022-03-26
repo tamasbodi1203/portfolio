@@ -2,7 +2,7 @@ package hu.portfoliotracker.Service;
 
 import hu.portfoliotracker.DTO.ClosedPositionDto;
 import hu.portfoliotracker.DTO.OpenPositionDto;
-import hu.portfoliotracker.DTO.PortfolioDto;
+import hu.portfoliotracker.DTO.BalanceDto;
 import hu.portfoliotracker.Enum.TRADING_TYPE;
 import hu.portfoliotracker.Model.ClosedPosition;
 import hu.portfoliotracker.Model.OpenPosition;
@@ -14,7 +14,9 @@ import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
@@ -36,6 +38,7 @@ public class PortfolioService {
     TradingPairRepository tradingPairRepository;
 
     //@Async("threadPoolTaskExecutor")
+    @Transactional
     public void initPositions(TRADING_TYPE tradingType) {
         System.out.println("Execute method asynchronously. "
                 + Thread.currentThread().getName());
@@ -48,7 +51,6 @@ public class PortfolioService {
             String baseAsset = tradingPair.getBaseAsset();
             // Vétel
             if (t.getSide().equals("BUY")){
-                //Double currentPrice = binanceService.getLastPrice(baseAsset + "USDT");
 
                 // Megnézzük, hogy létezik-e már nyitott számla az adott kriptovalutával ha nem, akkor nyitunk egyet
                 if (openPositionRepository.countBySymbolAndTradingType(baseAsset, tradingType) == 0L) {
@@ -80,7 +82,7 @@ public class PortfolioService {
                 // Eladás
             } else {
                 OpenPosition openPosition = openPositionRepository.findBySymbolAndTradingType(baseAsset, tradingType);
-                Double averageCostBasis = openPosition.getAverageCostBasis();
+                Double averageCostBasis = openPosition.getAverageCostBasis(); //TODO: ha olyan kriptovalutát szeretnénk eladni, amiből nincs nyitott pozíciónk, akkor NullPointerException-t dob (Short pozíciók lekezelése)
 
                 ClosedPosition closedPosition = ClosedPosition.builder()
                         .symbol(tradingPair.getSymbol())
@@ -99,11 +101,22 @@ public class PortfolioService {
                 if (openPosition.getQuantity() - closedPosition.getQuantity() != 0L) {
                     openPosition.setQuantity(openPosition.getQuantity() - closedPosition.getQuantity());
                     openPosition.setDeposit(openPosition.getDeposit() - closedPosition.getDeposit());
+                    openPositionRepository.save(openPosition);
                 } else {
                     openPositionRepository.delete(openPosition);
                 }
             }
         }
+    }
+
+    public void initBalances() {
+
+        // Töröljük minden futtatáskor a már meglévő pozíciókat, hogy ne duplikálódjanak
+        deleteAll();
+        initPositions(TRADING_TYPE.SPOT);
+        initPositions(TRADING_TYPE.CROSS);
+        initPositions(TRADING_TYPE.ISOLATED);
+
     }
 
     public void deleteAll(){
@@ -131,7 +144,9 @@ public class PortfolioService {
         return closedPositionRepository.findAllByTradingType(tradingType);
     }
 
-    public PortfolioDto getPortfolioDto(TRADING_TYPE tradingType) {
+    public BalanceDto getPortfolioDto(TRADING_TYPE tradingType) {
+        // TODO: Ha már lekérdeztük az árfolyamot egy korábbi pozíciónál, akkor ne kérjük le újra
+        HashMap<String, Double> priceMap = new HashMap<>();
         val openPositionDtos = new ArrayList<OpenPositionDto>();
         val closedPositionDtos = new ArrayList<ClosedPositionDto>();
         val openPositions = getOpenPositions(tradingType);
@@ -182,7 +197,7 @@ public class PortfolioService {
             totalRealizedGains += closedPositionDto.getRealizedGains();
         }
 
-        val portfolioDto = PortfolioDto.builder()
+        val balanceDto = BalanceDto.builder()
                 .openPositionDtos(openPositionDtos)
                 .closedPositionDtos(closedPositionDtos)
                 .totalDeposit(totalOpenDeposit)
@@ -192,7 +207,24 @@ public class PortfolioService {
                 .totalRealizedGainsPercent(totalRealizedGains / totalClosedDeposit)
                 .build();
 
-        return portfolioDto;
+        return balanceDto;
+    }
+
+    public List<BalanceDto> refreshPortfolio() {
+        log.info("Árfolyamok frissítése");
+        long startTime = System.nanoTime();
+        val portfolioDtos = new ArrayList<BalanceDto>();
+        val spotPortfolioDto = getPortfolioDto(TRADING_TYPE.SPOT);
+        val crossPortfolioDto = getPortfolioDto(TRADING_TYPE.CROSS);
+        val isolatedPortfolioDto = getPortfolioDto(TRADING_TYPE.ISOLATED);
+        portfolioDtos.add(spotPortfolioDto);
+        portfolioDtos.add(crossPortfolioDto);
+        portfolioDtos.add(isolatedPortfolioDto);
+        long stopTime = System.nanoTime();
+        long elpasedTime = stopTime - startTime;
+        log.info("Árfolyamok frissítése vége: " + String.valueOf(elpasedTime / 1000000000) + " seconds");
+
+        return portfolioDtos;
     }
 
 }

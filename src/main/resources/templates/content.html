@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+</head>
+
+<body>
+<div th:fragment="content1">
+    This is Content 1
+</div>
+
+<div th:fragment="content2">
+    Erre írja át
+</div>
+<p th:fragment="content3" th:text="${currency} + 1000" id="change_this"></p>
+<div th:fragment="content4" xmlns:th="http://www.thymeleaf.org" class="container">
+    <table class="table" id="refresh_table">
+        <thead>
+        <tr>
+            <th class="title" colspan="9">
+                Spot (Open positions)
+            </th>
+        </tr>
+        <tr>
+            <th scope="col" class="header">Symbol</th>
+            <th scope="col" class="header">Current Price</th>
+            <th scope="col" class="header">Opening Date</th>
+            <th scope="col" class="header">Deposit</th>
+            <th scope="col" class="header">Quantity</th>
+            <th scope="col" class="header">Average Cost Basis</th>
+            <th scope="col" class="header">Market Value</th>
+            <th scope="col" class="header" colspan="2">Unrealized Gains</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="openPosition: ${spotBalanceDto.openPositionDtos}">
+            <td>
+                <div>
+                    <img class="coin-logo" th:src="@{${'/images/currencies/' + openPosition.cmcId + '.png'}}">
+
+                    <div>
+                        <p class="symbol" th:text="${openPosition.symbol}"></p>
+                    </div>
+                </div>
+            </td>
+            <td th:text="${currency} + ${openPosition.currentPrice}"></td>
+            <td th:text="${#temporals.format(openPosition.date, 'yyyy-MM-dd HH:mm:ss')}"></td>
+            <td th:text="${currency} + ${#numbers.formatDecimal(openPosition.deposit,1,2)}"></td>
+            <td th:text="${#numbers.formatDecimal(openPosition.quantity,1,4)}"></td>
+            <td th:text="${currency} + ${#numbers.formatDecimal(openPosition.averageCostBasis,1,2)}"></td>
+            <td th:text="${currency} + ${#numbers.formatDecimal(openPosition.marketValue,1,2)}"></td>
+            <td th:if="${openPosition.unrealizedGains >= 0}"
+                class="positive"
+                th:text="'+' + ${currency} + ${#numbers.formatDecimal(openPosition.unrealizedGains,1,2)}"></td>
+            <td th:if="${openPosition.unrealizedGains < 0}"
+                th:with="inverted=${-openPosition.unrealizedGains}"
+                class="negative" th:text="'-' + ${currency} + ${#numbers.formatDecimal(inverted,1,2)}"></td>
+            <td th:if="${openPosition.unrealizedGainsPercent >= 0}"
+                class="positive"
+                th:text=" '+' + ${#numbers.formatPercent(openPosition.unrealizedGainsPercent,1,2)}"></td>
+            <td th:if="${openPosition.unrealizedGainsPercent < 0}"
+                class="negative" th:text="${#numbers.formatPercent(openPosition.unrealizedGainsPercent,1,2)}"></td>
+        </tr>
+        </tbody>
+        <tfoot>
+        <tr>
+            <th scope="col" colspan="3">Total deposit:</th>
+            <th scope="col" th:text="${currency} + ${#numbers.formatDecimal(spotBalanceDto.totalDeposit,1,2)}"></th>
+            <th scope="col" colspan="3">Total unrealized gains:</th>
+            <th th:if="${spotBalanceDto.totalUnrealizedGains >= 0}"
+                class="positive"
+                th:text="'+' + ${currency} + ${#numbers.formatDecimal(spotBalanceDto.totalUnrealizedGains,1,2)}"></th>
+            <th th:if="${spotBalanceDto.totalUnrealizedGains < 0}"
+                th:with="inverted=${-spotBalanceDto.totalUnrealizedGains}"
+                class="negative" th:text="'-' + ${currency} + ${#numbers.formatDecimal(inverted,1,2)}"></th>
+            <th scope="col" th:if="${spotBalanceDto.totalUnrealizedGainsPercent >= 0}"
+                class="positive"
+                th:text=" '+' + ${#numbers.formatPercent(spotBalanceDto.totalUnrealizedGainsPercent,1,2)}"></th>
+            <th scope="col" th:if="${spotBalanceDto.totalUnrealizedGainsPercent < 0}"
+                class="negative"
+                th:text="${#numbers.formatPercent(spotBalanceDto.totalUnrealizedGainsPercent,1,2)}"></th>
+        </tr>
+        </tfoot>
+    </table>
+</div>
+</body>
+</html>
