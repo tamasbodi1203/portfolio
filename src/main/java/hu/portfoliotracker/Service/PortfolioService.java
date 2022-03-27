@@ -14,7 +14,7 @@ import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -58,7 +58,7 @@ public class PortfolioService {
                     OpenPosition openPosition = OpenPosition.builder()
                             .symbol(tradingPair.getBaseAsset())
                             .cmcId(cryptocurrencyRepository.findByCurrency(tradingPair.getBaseAsset()).getCmcId())
-                            .date(trades.get(0).getDate())
+                            .date(t.getDate())
                             .deposit(t.getTotal())
                             .quantity(t.getAmount())
                             .averageCostBasis(averageCostBasis)
@@ -82,7 +82,8 @@ public class PortfolioService {
                 // Eladás
             } else {
                 OpenPosition openPosition = openPositionRepository.findBySymbolAndTradingType(baseAsset, tradingType);
-                Double averageCostBasis = openPosition.getAverageCostBasis(); //TODO: ha olyan kriptovalutát szeretnénk eladni, amiből nincs nyitott pozíciónk, akkor NullPointerException-t dob (Short pozíciók lekezelése)
+                // TODO: ha olyan kriptovalutát szeretnénk eladni, amiből nincs nyitott pozíciónk (eladás előtt nem volt vétel), akkor NullPointerException-t dob (Short pozíciók lekezelése)
+                Double averageCostBasis = openPosition.getAverageCostBasis();
 
                 ClosedPosition closedPosition = ClosedPosition.builder()
                         .symbol(tradingPair.getSymbol())
@@ -127,12 +128,12 @@ public class PortfolioService {
 
     public void saveOpenPosition(OpenPosition openPosition){
         openPositionRepository.save(openPosition);
-        log.info("Open position added: " + openPosition.toString());
+        log.info("Nyitott pozíció hozzáadva: " + openPosition.toString());
     }
 
     public void saveClosedPosition(ClosedPosition closedPosition){
         closedPositionRepository.save(closedPosition);
-        log.info("Closed position added: " + closedPosition.toString());
+        log.info("Zárt pozíció hozzáadva: " + closedPosition.toString());
     }
 
     public List<OpenPosition> getOpenPositions(TRADING_TYPE tradingType){
@@ -197,7 +198,7 @@ public class PortfolioService {
             totalRealizedGains += closedPositionDto.getRealizedGains();
         }
 
-        val balanceDto = BalanceDto.builder()
+        return BalanceDto.builder()
                 .openPositionDtos(openPositionDtos)
                 .closedPositionDtos(closedPositionDtos)
                 .totalDeposit(totalOpenDeposit)
@@ -206,8 +207,6 @@ public class PortfolioService {
                 .totalRealizedGains(totalRealizedGains)
                 .totalRealizedGainsPercent(totalRealizedGains / totalClosedDeposit)
                 .build();
-
-        return balanceDto;
     }
 
     public List<BalanceDto> refreshPortfolio() {

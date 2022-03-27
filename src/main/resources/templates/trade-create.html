@@ -3,7 +3,7 @@
 <div th:replace="fragments/header :: header (title='Add trade')"></div>
 <body>
 
-<div th:replace="fragments/menu :: menu (current='Add trade')"></div>
+<div th:replace="fragments/navigation :: navigation (current='Add trade')"></div>
 
 <div class="container">
     <!--/*@thymesVar id="trade" type="hu.portfoliotracker.Model.Trade"*/-->
@@ -47,6 +47,7 @@
             </select>
         </div>
         <button type="submit" class="btn btn-primary" th:text="${trade.id != null ? 'Modify' : 'Add'}">Submit</button>
+        <button type="submit" name="action" value="cancel" class="btn btn-primary">Cancel</button>
     </form>
 </div>
 

@@ -1,5 +1,6 @@
 package hu.portfoliotracker.Service;
 
+import hu.portfoliotracker.Enum.TRADING_TYPE;
 import hu.portfoliotracker.Model.Trade;
 import hu.portfoliotracker.Model.TradingPair;
 import hu.portfoliotracker.Repository.TradeRepository;
@@ -7,6 +8,7 @@ import hu.portfoliotracker.Repository.TradingPairRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -26,8 +28,12 @@ public class TradeService {
         log.info("Trade added: " + trade.toString());
     }
 
-    public List<Trade> getTrades(){
+    public List<Trade> getAllTrades(){
         return tradeRepository.findAllByOrderByDate();
+    }
+
+    public List<Trade> getAllByTradingType(TRADING_TYPE tradingType) {
+        return tradeRepository.findByTradingTypeOrderByOrderByDate(tradingType);
     }
 
     public void deleteTrade(long id){
@@ -41,6 +47,11 @@ public class TradeService {
 
     public void deleteAllTrades(){
         tradeRepository.deleteAll();
+    }
+
+    @Transactional
+    public void deleteAllTradesByTradingType(TRADING_TYPE tradingType){
+        tradeRepository.deleteAllByTradingType(tradingType);
     }
 
     public List<TradingPair> getAllTradingPairs() {

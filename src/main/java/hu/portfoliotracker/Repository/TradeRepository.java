@@ -3,6 +3,7 @@ package hu.portfoliotracker.Repository;
 import hu.portfoliotracker.Enum.TRADING_TYPE;
 import hu.portfoliotracker.Model.Trade;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -14,13 +15,17 @@ public interface TradeRepository extends JpaRepository<Trade, Long> {
 
     List<Trade> findAllByOrderByDate();
 
+    @Modifying
+    @Query("DELETE FROM Trade t WHERE tradingType = :tradingType")
+    void deleteAllByTradingType(@Param("tradingType") TRADING_TYPE tradingType);
+
     //List<Trade> findByTradingTypeByOrderByDate(TRADING_TYPE tradingType);
 
-    @Query("SELECT t from Trade t WHERE tradingType = :tradingType ORDER BY t.date")
+    @Query("SELECT t FROM Trade t WHERE tradingType = :tradingType ORDER BY t.date")
     List<Trade> findByTradingTypeOrderByOrderByDate(@Param("tradingType") TRADING_TYPE tradingType);
 
     //TODO: Legacy
-    @Query("SELECT t from Trade t WHERE pair = :pair ORDER BY t.date")
+    @Query("SELECT t FROM Trade t WHERE pair = :pair ORDER BY t.date")
     List<Trade> findAllByPairOrderByDate(@Param("pair") String pair);
 
     @Query("SELECT DISTINCT pair FROM Trade t")
