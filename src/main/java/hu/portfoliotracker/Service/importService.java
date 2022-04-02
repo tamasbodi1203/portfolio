@@ -6,6 +6,8 @@ import hu.portfoliotracker.Repository.TradeRepository;
 import hu.portfoliotracker.Utility.ImportHelper;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
+import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.mock.web.MockMultipartFile;
@@ -30,6 +32,23 @@ public class importService {
         return multipartFile;
     }
 
+    public boolean importFromFile(MultipartFile file, TRADING_TYPE tradingType) {
+        val extenstion = FilenameUtils.getExtension(file.getOriginalFilename());
+        switch (extenstion) {
+            case "csv":
+                saveCsv(file, tradingType);
+                return true;
+
+            case "xlsx":
+                saveXlsx(file, tradingType);
+                return true;
+
+            default:
+                log.error("Hiba történt a fájl beolvasása során");
+                return false;
+        }
+    }
+
     public void saveCsv(MultipartFile file, TRADING_TYPE tradingType) {
         try {
             List<Trade> trades = ImportHelper.csvToTrades(file.getInputStream(), tradingType);
@@ -38,13 +57,10 @@ public class importService {
             }
             tradeRepository.saveAll(trades);
         } catch (IOException e) {
-            throw new RuntimeException("Hiba a CSV fájl olvasása során: " + e.getMessage());
+            throw new RuntimeException("Hiba a CSV fájl beolvasása során: " + e.getMessage());
         }
     }
 
-    public void testXLSXReader() {
-        ImportHelper.testXlsxToTrades();
-    }
 
     public void saveXlsx(MultipartFile file, TRADING_TYPE tradingType) {
         try {
@@ -52,7 +68,7 @@ public class importService {
 
             tradeRepository.saveAll(trades);
         } catch (IOException e) {
-            throw new RuntimeException("Hiba az XLSX fájl olvasása során: " + e.getMessage());
+            throw new RuntimeException("Hiba az XLSX fájl beolvasása során: " + e.getMessage());
         }
     }
 
