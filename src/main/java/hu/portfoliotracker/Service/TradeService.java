@@ -3,10 +3,13 @@ package hu.portfoliotracker.Service;
 import hu.portfoliotracker.Enum.TRADING_TYPE;
 import hu.portfoliotracker.Model.Trade;
 import hu.portfoliotracker.Model.TradingPair;
+import hu.portfoliotracker.Model.User;
 import hu.portfoliotracker.Repository.TradeRepository;
 import hu.portfoliotracker.Repository.TradingPairRepository;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,6 +17,7 @@ import java.util.List;
 
 @Service
 @Slf4j
+@Transactional
 public class TradeService {
 
     @Autowired
@@ -33,7 +37,8 @@ public class TradeService {
     }
 
     public List<Trade> getAllByTradingType(TRADING_TYPE tradingType) {
-        return tradeRepository.findByTradingTypeOrderByOrderByDate(tradingType);
+        val user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return tradeRepository.findByTradingTypeOrderByOrderByDate(tradingType, user);
     }
 
     public void deleteTrade(long id){
@@ -49,9 +54,9 @@ public class TradeService {
         tradeRepository.deleteAll();
     }
 
-    @Transactional
     public void deleteAllTradesByTradingType(TRADING_TYPE tradingType){
-        tradeRepository.deleteAllByTradingType(tradingType);
+        val user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        tradeRepository.deleteAllByTradingTypeAndUser(tradingType, user);
     }
 
     public List<TradingPair> getAllTradingPairs() {

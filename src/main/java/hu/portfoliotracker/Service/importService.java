@@ -2,6 +2,7 @@ package hu.portfoliotracker.Service;
 
 import hu.portfoliotracker.Enum.TRADING_TYPE;
 import hu.portfoliotracker.Model.Trade;
+import hu.portfoliotracker.Model.User;
 import hu.portfoliotracker.Repository.TradeRepository;
 import hu.portfoliotracker.Utility.ImportHelper;
 import lombok.SneakyThrows;
@@ -11,7 +12,9 @@ import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.FileInputStream;
@@ -20,6 +23,7 @@ import java.util.List;
 
 @Service
 @Slf4j
+@Transactional
 public class importService {
 
     @Autowired

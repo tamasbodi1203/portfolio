@@ -4,14 +4,12 @@ import hu.portfoliotracker.DTO.ClosedPositionDto;
 import hu.portfoliotracker.DTO.OpenPositionDto;
 import hu.portfoliotracker.DTO.BalanceDto;
 import hu.portfoliotracker.Enum.TRADING_TYPE;
-import hu.portfoliotracker.Model.ClosedPosition;
-import hu.portfoliotracker.Model.OpenPosition;
-import hu.portfoliotracker.Model.Trade;
-import hu.portfoliotracker.Model.TradingPair;
+import hu.portfoliotracker.Model.*;
 import hu.portfoliotracker.Repository.*;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +20,7 @@ import java.util.List;
 
 @Service
 @Slf4j
+@Transactional
 public class PortfolioService {
 
     @Autowired
@@ -40,10 +39,11 @@ public class PortfolioService {
     //@Async("threadPoolTaskExecutor")
     @Transactional
     public void initPositions(TRADING_TYPE tradingType) {
+        val user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         System.out.println("Execute method asynchronously. "
                 + Thread.currentThread().getName());
         // Kereskedési típus alapján elkülönítjük a kereskedéseket
-        List<Trade> trades = tradeRepository.findByTradingTypeOrderByOrderByDate(tradingType);
+        List<Trade> trades = tradeRepository.findByTradingTypeOrderByOrderByDate(tradingType, user);
         Iterator<Trade> iterator = trades.iterator();
         while (iterator.hasNext()) {
             Trade t = iterator.next();
@@ -53,9 +53,10 @@ public class PortfolioService {
             if (t.getSide().equals("BUY")){
 
                 // Megnézzük, hogy létezik-e már nyitott számla az adott kriptovalutával ha nem, akkor nyitunk egyet
-                if (openPositionRepository.countBySymbolAndTradingType(baseAsset, tradingType) == 0L) {
+                if (openPositionRepository.countBySymbolAndTradingTypeAndUser(baseAsset, tradingType, user) == 0L) {
                     Double averageCostBasis = t.getTotal() /t.getAmount();
                     OpenPosition openPosition = OpenPosition.builder()
+                            .user(user)
                             .symbol(tradingPair.getBaseAsset())
                             .cmcId(cryptocurrencyRepository.findByCurrency(tradingPair.getBaseAsset()).getCmcId())
                             .date(t.getDate())
@@ -67,7 +68,7 @@ public class PortfolioService {
 
                     saveOpenPosition(openPosition);
                 } else {
-                    OpenPosition openPosition = openPositionRepository.findBySymbolAndTradingType(baseAsset, tradingType);
+                    OpenPosition openPosition = openPositionRepository.findBySymbolAndTradingTypeAndUser(baseAsset, tradingType, user);
                     Double deposit = openPosition.getDeposit() + t.getTotal();
                     Double quantity = openPosition.getQuantity() + t.getAmount();
                     Double averageCostBasis = deposit / quantity;
@@ -81,11 +82,12 @@ public class PortfolioService {
 
                 // Eladás
             } else {
-                OpenPosition openPosition = openPositionRepository.findBySymbolAndTradingType(baseAsset, tradingType);
+                OpenPosition openPosition = openPositionRepository.findBySymbolAndTradingTypeAndUser(baseAsset, tradingType, user);
                 // TODO: ha olyan kriptovalutát szeretnénk eladni, amiből nincs nyitott pozíciónk (eladás előtt nem volt vétel), akkor NullPointerException-t dob (Short pozíciók lekezelése)
                 Double averageCostBasis = openPosition.getAverageCostBasis();
 
                 ClosedPosition closedPosition = ClosedPosition.builder()
+                        .user(user)
                         .symbol(tradingPair.getSymbol())
                         .date(t.getDate())
                         .sellPrice(t.getPrice())
@@ -121,8 +123,9 @@ public class PortfolioService {
     }
 
     public void deleteAll(){
-        openPositionRepository.deleteAll();
-        closedPositionRepository.deleteAll();
+        val user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        openPositionRepository.deleteAllByUser(user);
+        closedPositionRepository.deleteAllByUser(user);
         log.info("Nyitott és zárt pozíciók törölve");
     }
 
@@ -137,12 +140,14 @@ public class PortfolioService {
     }
 
     public List<OpenPosition> getOpenPositions(TRADING_TYPE tradingType){
+        val user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         //binanceService.getAllBaseAssets();
-        return openPositionRepository.findAllByTradingType(tradingType);
+        return openPositionRepository.findAllByTradingTypeAndUser(tradingType, user);
     }
 
     public List<ClosedPosition> getClosedPositions(TRADING_TYPE tradingType){
-        return closedPositionRepository.findAllByTradingType(tradingType);
+        val user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return closedPositionRepository.findAllByTradingTypeAndUser(tradingType, user);
     }
 
     public BalanceDto getPortfolioDto(TRADING_TYPE tradingType) {

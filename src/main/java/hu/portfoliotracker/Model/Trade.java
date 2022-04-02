@@ -51,4 +51,7 @@ public class Trade {
     @Enumerated(EnumType.STRING)
     private TRADING_TYPE tradingType;
 
+    @ManyToOne
+    private User user;
+
 }
