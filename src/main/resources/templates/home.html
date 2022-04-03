@@ -83,6 +83,68 @@
         </tr>
         </tfoot>
     </table>
+    <script th:inline="javascript">
+
+    // this simply wraps the code in a function
+    // that waits for the DOM to be ready:
+    (function () {
+
+        // this is populated by Thymeleaf:
+        var pieChartData = /*[[${pieChartData}]]*/ [];
+
+        var series = [];
+        var data = [];
+
+        for (var i = 0; i < pieChartData.length; i++) {
+            var object = {};
+            console.log(pieChartDate[i].catname);
+            object.name = pieChartData[i].catName.toUpperCase();
+            object.y = pieChartData[i].catCount;
+            data.push(object);
+        }
+        var seriesObject = {
+            name: 'Course By Category',
+            colorByPoint: true,
+            data: data
+        };
+        series.push(seriesObject);
+        drawPieChart(series);
+
+        // draw the pie chart:
+        function drawPieChart(series) {
+            Highcharts.chart('chartContainer', {
+                chart: {
+                    plotBackgroundColor: null,
+                    plotBorderWidth: null,
+                    plotShadow: false,
+                    type: 'pie'
+                },
+                title: {
+                    text: 'Your Heading Goes Here'
+                },
+                tooltip: {
+                    formatter: function () {
+                        return '<strong>' + this.key + ': </strong>' + this.y;
+                    }
+                },
+                plotOptions: {
+                    pie: {
+                        allowPointSelect: true,
+                        cursor: 'pointer',
+                        dataLabels: {
+                            enabled: true,
+                            format: '<b>{point.name}</b>: {point.y}'
+                        }
+                    }
+                },
+                // use the series data defined earlier:
+                series: series
+            });
+        }
+
+    })();
+
+    </script>
 </div>
 <div class="container">
     <table class="table">
