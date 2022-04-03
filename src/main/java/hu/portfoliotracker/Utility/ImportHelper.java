@@ -1,7 +1,9 @@
 package hu.portfoliotracker.Utility;
 
+import hu.portfoliotracker.Controller.AuthController;
 import hu.portfoliotracker.Enum.TRADING_TYPE;
 import hu.portfoliotracker.Model.Trade;
+import hu.portfoliotracker.Model.User;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -12,7 +14,7 @@ import org.apache.commons.csv.CSVRecord;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.openxmlformats.schemas.drawingml.x2006.chart.CTArea3DChart;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
@@ -20,7 +22,9 @@ import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 @Slf4j
 public class ImportHelper {
@@ -40,12 +44,8 @@ public class ImportHelper {
 
     @SneakyThrows
     public static List<Trade> csvToTrades(InputStream is, TRADING_TYPE tradingType) {
-        List<Trade> trades = new ArrayList<Trade>();
-
-
-        //val containsBom = isContainBOM(is);
-        //val modifiedInputStream = removeBom(is);
-
+        val trades = new ArrayList<Trade>();
+        val user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         switch (tradingType){
             case SPOT:
@@ -57,6 +57,7 @@ public class ImportHelper {
 
                     for (CSVRecord csvRecord : csvRecords) {
                         Trade trade = Trade.builder()
+                                .user(user)
                                 .date(LocalDateTime.parse(csvRecord.get("Date(UTC)"), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
                                 .pair(csvRecord.get("Market"))
                                 .side(csvRecord.get("Type"))
@@ -83,6 +84,7 @@ public class ImportHelper {
                     for (CSVRecord csvRecord : csvRecords) {
 
                         Trade trade = Trade.builder()
+                                .user(user)
                                 .date(LocalDateTime.parse(csvRecord.get(0), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
                                 .pair(csvRecord.get(1))
                                 .side(csvRecord.get(2))
@@ -106,6 +108,7 @@ public class ImportHelper {
 
     public static List<Trade> xlsxToTrades(InputStream fileInputStream, TRADING_TYPE tradingType) {
         val trades = new ArrayList<Trade>();
+        val user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         try {
             val workbook = new XSSFWorkbook(fileInputStream);
@@ -123,6 +126,7 @@ public class ImportHelper {
 
                 // TODO: Deviza valuták figyelmen kívül hagyása
                 Trade trade = Trade.builder()
+                        .user(user)
                         .date(LocalDateTime.parse(row.getCell(0).getStringCellValue(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
                         .pair(row.getCell(1).getStringCellValue())
                         .side(row.getCell(2).getStringCellValue())

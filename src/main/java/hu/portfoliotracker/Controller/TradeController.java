@@ -74,24 +74,29 @@ public class TradeController {
     }
 
     // Lista törlés
+    // TODO: Törlés után a megnyitott fülre térjünk vissza
     @RequestMapping(method=RequestMethod.POST, params="action=clear_spot")
     public String deleteAllSpotTrades(){
         tradeService.deleteAllTradesByTradingType(TRADING_TYPE.SPOT);
+        portfolioService.initBalances();
         return "trade-history";
     }
     @RequestMapping(method=RequestMethod.POST, params="action=clear_cross")
     public String deleteAllCrossTrades(){
         tradeService.deleteAllTradesByTradingType(TRADING_TYPE.CROSS);
+        portfolioService.initBalances();
         return "trade-history";
     }
     @RequestMapping(method=RequestMethod.POST, params="action=clear_isolated")
     public String deleteAllIsolatedTrades(){
         tradeService.deleteAllTradesByTradingType(TRADING_TYPE.ISOLATED);
+        portfolioService.initBalances();
         return "trade-history";
     }
     @RequestMapping(method=RequestMethod.POST, params="action=clear_all")
     public String deleteAllTrades(){
         tradeService.deleteAllTrades();
+        portfolioService.initBalances();
         return "trade-history";
     }
 

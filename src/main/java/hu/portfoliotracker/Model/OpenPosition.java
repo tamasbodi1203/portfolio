@@ -42,4 +42,7 @@ public class OpenPosition {
     @Column(name = "TRADING_TYPE")
     @Enumerated(EnumType.STRING)
     private TRADING_TYPE tradingType;
+
+    @ManyToOne
+    private User user;
 }

@@ -1,7 +1,7 @@
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark static-top" th:fragment="navigation(current)" xmlns:th="http://www.thymeleaf.org">
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark static-top" th:fragment="navigation(current)" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
     <a class="navbar-brand"><img class="logo" th:src="@{/images/btc_logo.png}" width="10%" height="10%"></a>
     <div class="container">
-        <a class="navbar-brand" href="/">Thymeleaf - Bootstrap Tabs</a>
+        <a class="navbar-brand" href="/">Crypto Portfolio Tracker</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive"
                 aria-controls="navbarResponsive"
                 aria-expanded="false" aria-label="Toggle navigation">
@@ -10,16 +10,22 @@
         <div class="collapse navbar-collapse" id="navbarResponsive">
             <ul class="navbar-nav ml-auto">
                 <li class="nav-item" th:classappend="${current} == 'Portfolio' ? 'active' : ''" >
-                    <a class="nav-link" th:href="@{/}">Portfolio</a>
+                    <a sec:authorize="isAuthenticated()" class="nav-link" th:href="@{/}">Portfolio</a>
                 </li>
                 <li class="nav-item"  th:classappend="${current} == 'Trade history' ? 'active' : ''" >
-                    <a class="nav-link" th:href="@{/trade-history}">Trade History</a>
+                    <a sec:authorize="isAuthenticated()" class="nav-link" th:href="@{/trade-history}">Trade History</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#">Login</a>
+                    <a sec:authorize="isAuthenticated()" class="nav-link" href="#">Tax Report</a>
                 </li>
+<!--                <li class="nav-item">-->
+<!--                    <a class="nav-link" href="#">Contact</a>-->
+<!--                </li>-->
                 <li class="nav-item">
-                    <a class="nav-link" href="#">Contact</a>
+                    <a sec:authorize="isAuthenticated()" class="nav-item nav-link" th:href="@{/logout}">Logout</a>
+                </li>
+                <li class="nav-item" th:classappend="${current} == 'Login' ? 'active' : ''">
+                    <a sec:authorize="isAnonymous()" class="nav-item nav-link" th:href="@{/login}">Login</a>
                 </li>
             </ul>
         </div>

@@ -1,0 +1,27 @@
+<!DOCTYPE HTML>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<div th:replace="fragments/header :: header (title='Login')"></div>
+<body>
+<div th:replace="fragments/navigation :: navigation (current='Login')"></div>
+<div class="container">
+    <h1>Please log in</h1>
+    <!--/*@thymesVar id="user" type=hu.portfoliotracker.Model.User"*/-->
+    <form th:action="@{/login}" th:object="${user}" method="post" novalidate>
+        <div class="form-group">
+            <label for="username">Username</label>
+            <input type="text" class="form-control" id="username" th:field="*{username}" required autofocus>
+        </div>
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" class="form-control" id="password" th:field="*{password}" required>
+        </div>
+        <div th:if="${param.error}">
+            <p class="text-danger">[[${session.SPRING_SECURITY_LAST_EXCEPTION.message}]]</p>
+        </div>
+        <button type="submit" class="btn btn-primary" th:text="Login">Submit</button>
+        <a th:href="@{/register}" class="btn btn-secondary">Register</a>
+    </form>
+
+</div>
+</body>
+</html>
