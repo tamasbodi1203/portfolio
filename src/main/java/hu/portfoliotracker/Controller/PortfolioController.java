@@ -1,12 +1,13 @@
 package hu.portfoliotracker.Controller;
 
-import hu.portfoliotracker.DTO.CountCourse;
+import hu.portfoliotracker.DTO.BalanceDto;
 import hu.portfoliotracker.Service.PortfolioService;
 import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.ArrayList;
@@ -18,26 +19,25 @@ public class PortfolioController {
 
     @Autowired
     private PortfolioService portfolioService;
+    private List<BalanceDto> balanceDto;
 
     @GetMapping
-    public String listOfPositions(Model model) {
+    public String main(Model model) {
+        balanceDto = portfolioService.refreshPortfolio();
+        return "home";
+    }
 
-
-        val portfolioDtos = portfolioService.refreshPortfolio();
-        model.addAttribute("spotBalanceDto", portfolioDtos.get(0));
-        model.addAttribute("crossBalanceDto", portfolioDtos.get(1));
-        model.addAttribute("isolatedBalanceDto", portfolioDtos.get(2));
+    @GetMapping("{tab}")
+    public String tab(Model model, @PathVariable String tab) {
+        //val portfolioDtos = portfolioService.refreshPortfolio();
+        model.addAttribute("spotBalanceDto", balanceDto.get(0));
+        model.addAttribute("crossBalanceDto", balanceDto.get(1));
+        model.addAttribute("isolatedBalanceDto", balanceDto.get(2));
         model.addAttribute("currency", "$");
 
-        List<CountCourse> pieChartData = new ArrayList<>();
-        val cc1 = new CountCourse("Humanities", 123);
-        val cc2 = new CountCourse("Sciences", 145);
-        val cc3 = new CountCourse("Other", 67);
-        pieChartData.add(cc1);
-        pieChartData.add(cc2);
-        pieChartData.add(cc3);
-        model.addAttribute("pieChartData", pieChartData);
-        return "home";
+        // TODO: Üres adattal ne jelenjen meg semmi
+        model.addAttribute("chartData", getDymaicSpotChartData());
+        return "_" + tab;
     }
 
     @RequestMapping("content1")
@@ -45,4 +45,14 @@ public class PortfolioController {
         return "balance :: content1";
     }
 
+    private List<List<Object>> getDymaicSpotChartData() {
+        val listOfLists = new ArrayList<List<Object>>();
+        val spotDto = balanceDto.get(0);
+        for (val openPosition : spotDto.getOpenPositionDtos()) {
+            listOfLists.add(List.of(openPosition.getSymbol(), openPosition.getDeposit()));
+
+        }
+
+        return listOfLists;
+    }
 }

@@ -15,7 +15,12 @@
 }
 
 .table {
-  border: 1px solid black;
+    border: 1px solid black;
+}
+
+.chart {
+    float: left;
+    width: 40%;
 }
 
 .title {

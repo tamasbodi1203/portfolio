@@ -231,4 +231,21 @@ public class PortfolioService {
         return portfolioDtos;
     }
 
+    public List<BalanceDto> initPortfolio() {
+        log.info("Árfolyamok lekérdezése");
+        long startTime = System.nanoTime();
+        val portfolioDtos = new ArrayList<BalanceDto>();
+        val spotPortfolioDto = getPortfolioDto(TRADING_TYPE.SPOT);
+        val crossPortfolioDto = getPortfolioDto(TRADING_TYPE.CROSS);
+        val isolatedPortfolioDto = getPortfolioDto(TRADING_TYPE.ISOLATED);
+        portfolioDtos.add(spotPortfolioDto);
+        portfolioDtos.add(crossPortfolioDto);
+        portfolioDtos.add(isolatedPortfolioDto);
+        long stopTime = System.nanoTime();
+        long elpasedTime = stopTime - startTime;
+        log.info("Árfolyamok lekérdezésének vége: " + String.valueOf(elpasedTime / 1000000000) + " seconds");
+
+        return portfolioDtos;
+    }
+
 }
