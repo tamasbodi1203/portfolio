@@ -27,6 +27,9 @@
                 <li class="nav-item" th:classappend="${current} == 'Login' ? 'active' : ''">
                     <a sec:authorize="isAnonymous()" class="nav-item nav-link" th:href="@{/login}">Login</a>
                 </li>
+                <li class="nav-item" th:classappend="${current} == 'Register' ? 'active' : ''">
+                    <a sec:authorize="isAnonymous()" class="nav-item nav-link" th:href="@{/register}">Register</a>
+                </li>
             </ul>
         </div>
     </div>

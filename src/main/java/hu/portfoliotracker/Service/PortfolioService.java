@@ -162,26 +162,28 @@ public class PortfolioService {
         Double totalClosedDeposit = Double.valueOf(0);
         Double totalRealizedGains = Double.valueOf(0);
         for (val openPosition : openPositions) {
-            val currentPrice = binanceService.getLastPrice(openPosition.getSymbol() + "USDT");
-            val unrealizedGains = (currentPrice - openPosition.getAverageCostBasis()) * openPosition.getQuantity();
-            val openPositionDto = OpenPositionDto.builder()
-                    .symbol(openPosition.getSymbol())
-                    .cmcId(openPosition.getCmcId())
-                    .currentPrice(currentPrice)
-                    .date(openPosition.getDate())
-                    .deposit(openPosition.getDeposit())
-                    .quantity(openPosition.getQuantity())
-                    .averageCostBasis(openPosition.getAverageCostBasis())
-                    .marketValue(openPosition.getQuantity() * currentPrice)
-                    .unrealizedGains(unrealizedGains)
-                    //TODO: 0-val való osztás lekezelése
-                    .unrealizedGainsPercent(unrealizedGains / (openPosition.getQuantity() * openPosition.getAverageCostBasis()))
-                    .tradingType(tradingType)
-                    .build();
+            if (!(openPosition.getDeposit() < 1)){
+                val currentPrice = binanceService.getLastPrice(openPosition.getSymbol() + "USDT");
+                val unrealizedGains = (currentPrice - openPosition.getAverageCostBasis()) * openPosition.getQuantity();
+                val openPositionDto = OpenPositionDto.builder()
+                        .symbol(openPosition.getSymbol())
+                        .cmcId(openPosition.getCmcId())
+                        .currentPrice(currentPrice)
+                        .date(openPosition.getDate())
+                        .deposit(openPosition.getDeposit())
+                        .quantity(openPosition.getQuantity())
+                        .averageCostBasis(openPosition.getAverageCostBasis())
+                        .marketValue(openPosition.getQuantity() * currentPrice)
+                        .unrealizedGains(unrealizedGains)
+                        //TODO: 0-val való osztás lekezelése
+                        .unrealizedGainsPercent(unrealizedGains / (openPosition.getQuantity() * openPosition.getAverageCostBasis()))
+                        .tradingType(tradingType)
+                        .build();
 
-            openPositionDtos.add(openPositionDto);
-            totalOpenDeposit += openPositionDto.getDeposit();
-            totalUnrealizedGains += openPositionDto.getUnrealizedGains();
+                openPositionDtos.add(openPositionDto);
+                totalOpenDeposit += openPositionDto.getDeposit();
+                totalUnrealizedGains += openPositionDto.getUnrealizedGains();
+            }
         }
         for (val closedPosition : closedPositions) {
             val realizedGains = closedPosition.getQuantity() * (closedPosition.getSellPrice() - closedPosition.getAverageCostBasis());
@@ -227,23 +229,6 @@ public class PortfolioService {
         long stopTime = System.nanoTime();
         long elpasedTime = stopTime - startTime;
         log.info("Árfolyamok frissítése vége: " + String.valueOf(elpasedTime / 1000000000) + " seconds");
-
-        return portfolioDtos;
-    }
-
-    public List<BalanceDto> initPortfolio() {
-        log.info("Árfolyamok lekérdezése");
-        long startTime = System.nanoTime();
-        val portfolioDtos = new ArrayList<BalanceDto>();
-        val spotPortfolioDto = getPortfolioDto(TRADING_TYPE.SPOT);
-        val crossPortfolioDto = getPortfolioDto(TRADING_TYPE.CROSS);
-        val isolatedPortfolioDto = getPortfolioDto(TRADING_TYPE.ISOLATED);
-        portfolioDtos.add(spotPortfolioDto);
-        portfolioDtos.add(crossPortfolioDto);
-        portfolioDtos.add(isolatedPortfolioDto);
-        long stopTime = System.nanoTime();
-        long elpasedTime = stopTime - startTime;
-        log.info("Árfolyamok lekérdezésének vége: " + String.valueOf(elpasedTime / 1000000000) + " seconds");
 
         return portfolioDtos;
     }

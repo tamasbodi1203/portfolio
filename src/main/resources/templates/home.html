@@ -5,14 +5,14 @@
 
 <div th:replace="fragments/navigation :: navigation (current='Portfolio')"></div>
 <div class="container">
-    <ul class="nav nav-tabs mt-5" id="myTabs">
-        <li class="nav-item"><a href="#tab1" data-url="/open-positions" class="nav-link active">Open Positions</a></li>
-        <li class="nav-item"><a href="#tab2" data-url="/closed-positions" class="nav-link">Closed Positions</a></li>
+    <ul class="nav nav-tabs mt-5" id="positionTabs">
+        <li class="nav-item"><a href="#positionsTab1" data-url="/open-positions" class="nav-link active">Open Positions</a></li>
+        <li class="nav-item"><a href="#positionsTab2" data-url="/closed-positions" class="nav-link">Closed Positions</a></li>
     </ul>
 
     <div class="tab-content pt-3">
-        <div class="tab-pane active" id="tab1"></div>
-        <div class="tab-pane" id="tab2"></div>
+        <div class="tab-pane active" id="positionsTab1"></div>
+        <div class="tab-pane" id="positionsTab2"></div>
     </div>
 </div>
 
@@ -23,7 +23,7 @@
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 
 <script>
-    $('#myTabs a').click(function (e) {
+    $('#positionTabs a').click(function (e) {
         e.preventDefault();
 
         var url = $(this).attr("data-url");
@@ -37,7 +37,7 @@
     });
 
     // load first tab content
-    $('#tab1').load($('.nav-link.active').attr("data-url"), function (result) {
+    $('#positionsTab1').load($('.nav-link.active').attr("data-url"), function (result) {
     });
 </script>
 </body>

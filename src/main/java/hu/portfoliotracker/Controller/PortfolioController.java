@@ -35,8 +35,10 @@ public class PortfolioController {
         model.addAttribute("isolatedBalanceDto", balanceDto.get(2));
         model.addAttribute("currency", "$");
 
-        // TODO: Üres adattal ne jelenjen meg semmi
-        model.addAttribute("chartData", getDymaicSpotChartData());
+        // TODO: Üres adattal ne jelenjen meg semmi, switch-es refaktorálás
+        model.addAttribute("chartDataSpot", getDymaicSpotChartData());
+        model.addAttribute("chartDataCross", getDymaicCrossChartData());
+        model.addAttribute("chartDataIsolated", getDymaicIsoaltedChartData());
         return "_" + tab;
     }
 
@@ -49,8 +51,27 @@ public class PortfolioController {
         val listOfLists = new ArrayList<List<Object>>();
         val spotDto = balanceDto.get(0);
         for (val openPosition : spotDto.getOpenPositionDtos()) {
-            listOfLists.add(List.of(openPosition.getSymbol(), openPosition.getDeposit()));
+            listOfLists.add(List.of(openPosition.getSymbol(), openPosition.getMarketValue()));
+        }
 
+        return listOfLists;
+    }
+
+    private List<List<Object>> getDymaicCrossChartData() {
+        val listOfLists = new ArrayList<List<Object>>();
+        val crossDto = balanceDto.get(1);
+        for (val openPosition : crossDto.getOpenPositionDtos()) {
+            listOfLists.add(List.of(openPosition.getSymbol(), openPosition.getMarketValue()));
+        }
+
+        return listOfLists;
+    }
+
+    private List<List<Object>> getDymaicIsoaltedChartData() {
+        val listOfLists = new ArrayList<List<Object>>();
+        val isolatedDto = balanceDto.get(2);
+        for (val openPosition : isolatedDto.getOpenPositionDtos()) {
+            listOfLists.add(List.of(openPosition.getSymbol(), openPosition.getMarketValue()));
         }
 
         return listOfLists;
