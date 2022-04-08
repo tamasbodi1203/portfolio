@@ -13,6 +13,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.*;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -43,7 +46,7 @@ public class PortfolioService {
         System.out.println("Execute method asynchronously. "
                 + Thread.currentThread().getName());
         // Kereskedési típus alapján elkülönítjük a kereskedéseket
-        List<Trade> trades = tradeRepository.findByTradingTypeOrderByOrderByDate(tradingType, user);
+        List<Trade> trades = tradeRepository.findByTradingTypeOrderByDate(tradingType, user);
         Iterator<Trade> iterator = trades.iterator();
         while (iterator.hasNext()) {
             Trade t = iterator.next();
@@ -112,6 +115,80 @@ public class PortfolioService {
         }
     }
 
+    @Transactional
+    public BalanceDto calculatePositionsByDate(TRADING_TYPE tradingType, LocalDateTime date) {
+        val balanceDTO = new BalanceDto();
+        val openPositions = new ArrayList<OpenPositionDto>();
+        val closedPositions = new ArrayList<ClosedPositionDto>();
+        val user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        // Kereskedési típus alapján elkülönítjük a kereskedéseket
+        List<Trade> trades = tradeRepository.findByTradingTypeAndDateOrderByDate(tradingType, date, user);
+        Iterator<Trade> iterator = trades.iterator();
+        while (iterator.hasNext()) {
+            Trade t = iterator.next();
+            TradingPair tradingPair = tradingPairRepository.findBySymbol(t.getPair());
+            String baseAsset = tradingPair.getBaseAsset();
+            // Vétel
+            if (t.getSide().equals("BUY")){
+
+                // Megnézzük, hogy létezik-e már nyitott számla az adott kriptovalutával ha nem, akkor nyitunk egyet
+                if (openPositions.stream().filter(e -> e.getSymbol().equals(baseAsset)).count() == 0) {
+                    Double averageCostBasis = t.getTotal() / t.getAmount();
+                    val openPosition = OpenPositionDto.builder()
+                            .symbol(tradingPair.getBaseAsset())
+                            .cmcId(cryptocurrencyRepository.findByCurrency(tradingPair.getBaseAsset()).getCmcId())
+                            .date(t.getDate())
+                            .deposit(t.getTotal())
+                            .quantity(t.getAmount())
+                            .averageCostBasis(averageCostBasis)
+                            .tradingType(tradingType)
+                            .build();
+
+                    openPositions.add(openPosition);
+                } else {
+                    val openPosition = openPositions.stream().filter(e -> e.getSymbol().equals(baseAsset)).findAny().orElseThrow();
+                    Double deposit = openPosition.getDeposit() + t.getTotal();
+                    Double quantity = openPosition.getQuantity() + t.getAmount();
+                    Double averageCostBasis = deposit / quantity;
+
+                    openPosition.setDeposit(deposit);
+                    openPosition.setQuantity(quantity);
+                    openPosition.setAverageCostBasis(averageCostBasis);
+                }
+
+                // Eladás
+            } else {
+                val openPosition = openPositions.stream().filter(e -> e.getSymbol().equals(baseAsset)).findAny().orElseThrow();
+                // TODO: ha olyan kriptovalutát szeretnénk eladni, amiből nincs nyitott pozíciónk (eladás előtt nem volt vétel), akkor NullPointerException-t dob (Short pozíciók lekezelése)
+                Double averageCostBasis = openPosition.getAverageCostBasis();
+
+                val closedPosition = ClosedPositionDto.builder()
+                        .symbol(tradingPair.getSymbol())
+                        .date(t.getDate())
+                        .sellPrice(t.getPrice())
+                        .deposit(t.getAmount() * averageCostBasis)
+                        .quantity(t.getAmount())
+                        .averageCostBasis(averageCostBasis)
+                        .marketValue(t.getAmount() * t.getPrice())
+                        .tradingType(tradingType)
+                        .build();
+
+                closedPositions.add(closedPosition);
+
+                // Eladás után újra kalkulkuláljuk a megfelelő nyitott pozíciót, ha nem 0 a hátramaradt mennyiség
+                if (openPosition.getQuantity() - closedPosition.getQuantity() != 0L) {
+                    openPosition.setQuantity(openPosition.getQuantity() - closedPosition.getQuantity());
+                    openPosition.setDeposit(openPosition.getDeposit() - closedPosition.getDeposit());
+                } else {
+                    openPositions.remove(openPosition);
+                }
+            }
+        }
+        balanceDTO.setOpenPositionDtos(openPositions);
+        balanceDTO.setClosedPositionDtos(closedPositions);
+        return balanceDTO;
+    }
+
     public void initBalances() {
 
         // Töröljük minden futtatáskor a már meglévő pozíciókat, hogy ne duplikálódjanak
@@ -141,7 +218,6 @@ public class PortfolioService {
 
     public List<OpenPosition> getOpenPositions(TRADING_TYPE tradingType){
         val user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        //binanceService.getAllBaseAssets();
         return openPositionRepository.findAllByTradingTypeAndUser(tradingType, user);
     }
 
@@ -231,6 +307,18 @@ public class PortfolioService {
         log.info("Árfolyamok frissítése vége: " + String.valueOf(elpasedTime / 1000000000) + " seconds");
 
         return portfolioDtos;
+    }
+
+    public void calculatePerformance() {
+        // A mai naptól számított 7 nappal korábbi nap
+        LocalDateTime sevenDaysBefore = LocalDate.now()
+                .atTime(LocalTime.MAX)
+                .minus(7, ChronoUnit.DAYS);
+        val ms = ZonedDateTime.of(sevenDaysBefore, ZoneId.systemDefault()).toInstant().getEpochSecond() * 1000;
+        val balance = calculatePositionsByDate(TRADING_TYPE.SPOT, sevenDaysBefore);
+
+        binanceService.getLastPriceByDate("BTC", ms);
+        System.out.println("valami");
     }
 
 }

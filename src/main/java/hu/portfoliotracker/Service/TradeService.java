@@ -38,7 +38,7 @@ public class TradeService {
 
     public List<Trade> getAllByTradingType(TRADING_TYPE tradingType) {
         val user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        return tradeRepository.findByTradingTypeOrderByOrderByDate(tradingType, user);
+        return tradeRepository.findByTradingTypeOrderByDate(tradingType, user);
     }
 
     public void deleteTrade(long id){

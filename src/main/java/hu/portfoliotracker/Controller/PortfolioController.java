@@ -42,6 +42,11 @@ public class PortfolioController {
         return "_" + tab;
     }
 
+    @GetMapping("/performance")
+    public void calculatePerformance(){
+        portfolioService.calculatePerformance();
+    }
+
     @RequestMapping("content1")
     public String getContent1() {
         return "balance :: content1";
