@@ -8,7 +8,7 @@
     <script type="text/javascript" th:inline="javascript">
 
         // Load the Visualization API and the corechart package.
-        google.charts.load('current', {'packages':['line']});
+        google.charts.load('current', {'packages':['corechart']});
 
         // Set a callback to run when the Google Visualization API is loaded.
         google.charts.setOnLoadCallback(drawChart);
@@ -21,16 +21,19 @@
             // Create the data table.
             var data = new google.visualization.DataTable();
             data.addColumn('string', 'Date');
-            data.addColumn('number', 'Value');
+            data.addColumn('number', 'Value ($)');
             data.addRows([[${chartData}]]);
 
             // Set chart options
             var options = {'title':'Spot performance chart',
-                'width':800,
-                'height':600};
+                width:800,
+                height:600,
+                vAxis:{format: '$#'
+                    }
+            };
 
             // Instantiate and draw our chart, passing in some options.
-            var chart = new google.charts.Line(document.getElementById('chart_div'));
+            var chart = new google.visualization.AreaChart(document.getElementById('chart_div'));
             chart.draw(data, options);
         }
     </script>
