@@ -126,7 +126,7 @@ public class PerformanceService {
         return performanceDto;
     }
 
-    public void calculatePerformance() {
+    public List<PerformanceDto> calculatePerformance() {
         val performances = new ArrayList<PerformanceDto>();
         // A mai naptól számított 7 nappal korábbi nap
         LocalDateTime sevenDaysBefore = LocalDate.now()
@@ -178,7 +178,7 @@ public class PerformanceService {
         val performance1 = calculatePositionsByDate(TRADING_TYPE.SPOT, oneDayBefore);
         performances.add(performance1);
 
-        System.out.println("valami");
+        return performances;
     }
 
 }

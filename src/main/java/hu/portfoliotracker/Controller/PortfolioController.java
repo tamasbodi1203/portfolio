@@ -46,8 +46,10 @@ public class PortfolioController {
     }
 
     @GetMapping("/performance")
-    public void calculatePerformance(){
-        performanceService.calculatePerformance();
+    public String calculatePerformance(Model model){
+
+        model.addAttribute("chartData", getSpotPerformanceChartData());
+        return "performance-chart";
     }
 
     @RequestMapping("content1")
@@ -80,6 +82,16 @@ public class PortfolioController {
         val isolatedDto = balanceDto.get(2);
         for (val openPosition : isolatedDto.getOpenPositionDtos()) {
             listOfLists.add(List.of(openPosition.getSymbol(), openPosition.getMarketValue()));
+        }
+
+        return listOfLists;
+    }
+
+    private List<List<Object>> getSpotPerformanceChartData() {
+        val listOfLists = new ArrayList<List<Object>>();
+        val snapshots = performanceService.calculatePerformance();
+        for (val snapshot : snapshots){
+            listOfLists.add(List.of(snapshot.getLocalDate().toString(), snapshot.getTotalValue()));
         }
 
         return listOfLists;
