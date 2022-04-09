@@ -86,6 +86,7 @@ public class BinanceService {
         val mapper = new ObjectMapper();
         val root = mapper.readTree(response.getBody());
         val closePrice = root.get(0).get(4).asDouble();
+        log.info(tradingPair + " close price: " + closePrice);
         return closePrice;
 
     }

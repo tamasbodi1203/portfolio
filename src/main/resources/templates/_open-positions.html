@@ -69,6 +69,7 @@
         </tfoot>
     </table>
     <div id="chart_spot" class="distribution-chart"></div>
+    <div id="performance_chart" class="performance-chart"></div>
 </div>
 <!--Cross-->
 <div class="flex-container">
@@ -290,6 +291,38 @@
 
             // Instantiate and draw our chart, passing in some options.
             var chart = new google.visualization.PieChart(document.getElementById('chart_isolated'));
+            chart.draw(data, options);
+        }
+</script>
+<!--Account Performance Chart-->
+<script type="text/javascript" th:inline="javascript">
+
+        // Load the Visualization API and the corechart package.
+        google.charts.load('current', {'packages':['corechart']});
+
+        // Set a callback to run when the Google Visualization API is loaded.
+        google.charts.setOnLoadCallback(drawChart);
+
+        // Callback that creates and populates a data table,
+        // instantiates the pie chart, passes in the data and
+        // draws it.
+        function drawChart() {
+
+            // Create the data table.
+            var data = new google.visualization.DataTable();
+            data.addColumn('string', 'Date');
+            data.addColumn('number', 'Value');
+            data.addRows([[${performanceChartData}]]);
+
+            // Set chart options
+            var options = {'title':'Account Performance',
+                vAxis:{format: '$#',
+
+                    }
+            };
+
+            // Instantiate and draw our chart, passing in some options.
+            var chart = new google.visualization.AreaChart(document.getElementById('performance_chart'));
             chart.draw(data, options);
         }
 </script>

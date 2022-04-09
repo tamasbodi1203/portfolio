@@ -1,6 +1,7 @@
 package hu.portfoliotracker.Controller;
 
 import hu.portfoliotracker.DTO.BalanceDto;
+import hu.portfoliotracker.Enum.TRADING_TYPE;
 import hu.portfoliotracker.Service.PerformanceService;
 import hu.portfoliotracker.Service.PortfolioService;
 import lombok.val;
@@ -38,6 +39,7 @@ public class PortfolioController {
         model.addAttribute("isolatedBalanceDto", balanceDto.get(2));
         model.addAttribute("currency", "$");
 
+        model.addAttribute("performanceChartData", getPerformanceChartData());
         // TODO: Üres adattal ne jelenjen meg semmi, switch-es refaktorálás
         model.addAttribute("chartDataSpot", getDymaicSpotChartData());
         model.addAttribute("chartDataCross", getDymaicCrossChartData());
@@ -89,9 +91,19 @@ public class PortfolioController {
 
     private List<List<Object>> getSpotPerformanceChartData() {
         val listOfLists = new ArrayList<List<Object>>();
-        val snapshots = performanceService.calculatePerformance();
+        val snapshots = performanceService.calculatePerformance(TRADING_TYPE.SPOT);
         for (val snapshot : snapshots){
-            listOfLists.add(List.of(snapshot.getLocalDate().toString(), snapshot.getTotalValue()));
+            listOfLists.add(List.of(snapshot.getDate().toString(), snapshot.getTotalValue()));
+        }
+
+        return listOfLists;
+    }
+
+    private List<List<Object>> getPerformanceChartData() {
+        val listOfLists = new ArrayList<List<Object>>();
+        val snapshots = performanceService.getLastSevenDays();
+        for (val snapshot : snapshots){
+            listOfLists.add(List.of(snapshot.getDate().toString(), snapshot.getAccountTotal()));
         }
 
         return listOfLists;

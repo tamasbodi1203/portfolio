@@ -1,14 +1,15 @@
 package hu.portfoliotracker.Service;
 
-import hu.portfoliotracker.DTO.BalanceDto;
 import hu.portfoliotracker.DTO.ClosedPositionDto;
 import hu.portfoliotracker.DTO.OpenPositionDto;
 import hu.portfoliotracker.DTO.PerformanceDto;
 import hu.portfoliotracker.Enum.TRADING_TYPE;
+import hu.portfoliotracker.Model.Snapshot;
 import hu.portfoliotracker.Model.Trade;
 import hu.portfoliotracker.Model.TradingPair;
 import hu.portfoliotracker.Model.User;
 import hu.portfoliotracker.Repository.CryptocurrencyRepository;
+import hu.portfoliotracker.Repository.SnapshotRepository;
 import hu.portfoliotracker.Repository.TradeRepository;
 import hu.portfoliotracker.Repository.TradingPairRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -32,11 +33,13 @@ public class PerformanceService {
     @Autowired
     private TradeRepository tradeRepository;
     @Autowired
-    TradingPairRepository tradingPairRepository;
-    @Autowired
-    private BinanceService binanceService;
+    private TradingPairRepository tradingPairRepository;
     @Autowired
     private CryptocurrencyRepository cryptocurrencyRepository;
+    @Autowired
+    private SnapshotRepository snapshotRepository;
+    @Autowired
+    private BinanceService binanceService;
 
     @Transactional
     public PerformanceDto calculatePositionsByDate(TRADING_TYPE tradingType, LocalDateTime date) {
@@ -57,17 +60,14 @@ public class PerformanceService {
 
                 // Megnézzük, hogy létezik-e már nyitott számla az adott kriptovalutával ha nem, akkor nyitunk egyet
                 if (openPositions.stream().noneMatch(e -> e.getSymbol().equals(baseAsset))) {
-                    val closePrice = binanceService.getLastPriceByDate(t.getPair(), ms);
                     Double averageCostBasis = t.getTotal() / t.getAmount();
                     val openPosition = OpenPositionDto.builder()
                             .symbol(tradingPair.getBaseAsset())
                             .cmcId(cryptocurrencyRepository.findByCurrency(tradingPair.getBaseAsset()).getCmcId())
-                            .currentPrice(closePrice)
                             .date(t.getDate())
                             .deposit(t.getTotal())
                             .quantity(t.getAmount())
                             .averageCostBasis(averageCostBasis)
-                            .marketValue(t.getAmount() * closePrice)
                             .tradingType(tradingType)
                             .build();
 
@@ -113,72 +113,119 @@ public class PerformanceService {
             }
         }
 
-        performanceDto.setLocalDate(date.toLocalDate());
+        performanceDto.setDate(date.toLocalDate());
         performanceDto.setTrading_type(tradingType);
         performanceDto.setOpenPositionDtos(openPositions);
         performanceDto.setClosedPositionDtos(closedPositions);
         for (val openPosition: openPositions) {
+            val closePrice = binanceService.getLastPriceByDate(openPosition.getSymbol() + "USDT", ms);
+            openPosition.setCurrentPrice(closePrice);
+            openPosition.setMarketValue(openPosition.getQuantity() * closePrice);
             performanceDto.setTotalValue(performanceDto.getTotalValue() + openPosition.getMarketValue());
         }
-//        for (val closedPosition: closedPositions) {
-//            performanceDto.setTotalValue(performanceDto.getTotalValue() + closedPosition.getMarketValue());
-//        }
+        for (val closedPosition: closedPositions) {
+            performanceDto.setTotalValue(performanceDto.getTotalValue() + (closedPosition.getMarketValue() - closedPosition.getDeposit()));
+        }
         return performanceDto;
     }
 
-    public List<PerformanceDto> calculatePerformance() {
+    public List<PerformanceDto> calculatePerformance(TRADING_TYPE tradingType) {
         val performances = new ArrayList<PerformanceDto>();
         // A mai naptól számított 7 nappal korábbi nap
         LocalDateTime sevenDaysBefore = LocalDate.now()
                 .atTime(LocalTime.MAX)
                 .minus(7, ChronoUnit.DAYS);
 
-        val performance7 = calculatePositionsByDate(TRADING_TYPE.SPOT, sevenDaysBefore);
+        val performance7 = calculatePositionsByDate(tradingType, sevenDaysBefore);
         performances.add(performance7);
         // 6
         LocalDateTime sixDaysBefore = LocalDate.now()
                 .atTime(LocalTime.MAX)
                 .minus(6, ChronoUnit.DAYS);
 
-        val performance6 = calculatePositionsByDate(TRADING_TYPE.SPOT, sixDaysBefore);
+        val performance6 = calculatePositionsByDate(tradingType, sixDaysBefore);
         performances.add(performance6);
         // 5
         LocalDateTime fiveDaysBefore = LocalDate.now()
                 .atTime(LocalTime.MAX)
                 .minus(5, ChronoUnit.DAYS);
 
-        val performance5 = calculatePositionsByDate(TRADING_TYPE.SPOT, fiveDaysBefore);
+        val performance5 = calculatePositionsByDate(tradingType, fiveDaysBefore);
         performances.add(performance5);
         // 4
         LocalDateTime fourDaysBefore = LocalDate.now()
                 .atTime(LocalTime.MAX)
                 .minus(4, ChronoUnit.DAYS);
 
-        val performance4 = calculatePositionsByDate(TRADING_TYPE.SPOT, fourDaysBefore);
+        val performance4 = calculatePositionsByDate(tradingType, fourDaysBefore);
         performances.add(performance4);
         // 3
         LocalDateTime threeDaysBefore = LocalDate.now()
                 .atTime(LocalTime.MAX)
                 .minus(3, ChronoUnit.DAYS);
 
-        val performance3 = calculatePositionsByDate(TRADING_TYPE.SPOT, threeDaysBefore);
+        val performance3 = calculatePositionsByDate(tradingType, threeDaysBefore);
         performances.add(performance3);
         // 2
         LocalDateTime twoDaysBefore = LocalDate.now()
                 .atTime(LocalTime.MAX)
                 .minus(2, ChronoUnit.DAYS);
 
-        val performance2 = calculatePositionsByDate(TRADING_TYPE.SPOT, twoDaysBefore);
+        val performance2 = calculatePositionsByDate(tradingType, twoDaysBefore);
         performances.add(performance2);
         // 1
         LocalDateTime oneDayBefore = LocalDate.now()
                 .atTime(LocalTime.MAX)
                 .minus(1, ChronoUnit.DAYS);
 
-        val performance1 = calculatePositionsByDate(TRADING_TYPE.SPOT, oneDayBefore);
+        val performance1 = calculatePositionsByDate(tradingType, oneDayBefore);
         performances.add(performance1);
 
         return performances;
+    }
+
+    public List<PerformanceDto> calculateDailySnapshots(int minusDays) {
+        val dailyAccountSnapshot = new ArrayList<PerformanceDto>();
+        val date = LocalDate.now()
+                .atTime(LocalTime.MAX)
+                .minus(minusDays, ChronoUnit.DAYS);
+
+        val spotSnapshot = calculatePositionsByDate(TRADING_TYPE.SPOT, date);
+        dailyAccountSnapshot.add(spotSnapshot);
+        val crossSnapshot = calculatePositionsByDate(TRADING_TYPE.CROSS, date);
+        dailyAccountSnapshot.add(crossSnapshot);
+        val isolatedSnapshot = calculatePositionsByDate(TRADING_TYPE.ISOLATED, date);
+        dailyAccountSnapshot.add(isolatedSnapshot);
+
+
+        return dailyAccountSnapshot;
+    }
+
+    public void initAccountSnapshots() {
+        snapshotRepository.deleteAll();
+        val user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        val snapshots = new ArrayList<Snapshot>();
+        for (int i = 7; i>=1; i--){
+            // A megadott napon lévő számlák
+            val dailyAccountSnapshot = calculateDailySnapshots(i);
+            var totalValue = 0;
+            for (val performanceDto : dailyAccountSnapshot) {
+                totalValue += performanceDto.getTotalValue();
+            }
+            val snapshot = Snapshot.builder()
+                    .date(dailyAccountSnapshot.get(0).getDate())
+                    .accountTotal(totalValue)
+                    .user(user)
+                    .build();
+            snapshots.add(snapshot);
+        }
+        snapshotRepository.saveAll(snapshots);
+        log.info("End of snapshot init");
+    }
+
+    public List<Snapshot> getLastSevenDays() {
+        val user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return snapshotRepository.findAllByUser(user);
     }
 
 }

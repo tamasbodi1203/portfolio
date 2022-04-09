@@ -15,7 +15,7 @@ import java.util.List;
 @Data
 public class PerformanceDto {
 
-    private LocalDate localDate;
+    private LocalDate date;
 
     private TRADING_TYPE trading_type;
 

@@ -57,3 +57,11 @@
     right: 0%;
     z-index: 0;
 }
+
+.performance-chart {
+    position: absolute;
+    width: 30%;
+    height: 40%;
+    left: 0%;
+    z-index: 0;
+}
