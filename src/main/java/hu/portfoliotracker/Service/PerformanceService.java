@@ -19,6 +19,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.*;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -60,7 +62,7 @@ public class PerformanceService {
 
                 // Megnézzük, hogy létezik-e már nyitott számla az adott kriptovalutával ha nem, akkor nyitunk egyet
                 if (openPositions.stream().noneMatch(e -> e.getSymbol().equals(baseAsset))) {
-                    Double averageCostBasis = t.getTotal() / t.getAmount();
+                    BigDecimal averageCostBasis = t.getTotal().divide(t.getAmount(), 4, RoundingMode.HALF_UP);
                     val openPosition = OpenPositionDto.builder()
                             .symbol(tradingPair.getBaseAsset())
                             .cmcId(cryptocurrencyRepository.findByCurrency(tradingPair.getBaseAsset()).getCmcId())
@@ -74,39 +76,38 @@ public class PerformanceService {
                     openPositions.add(openPosition);
                 } else {
                     val openPosition = openPositions.stream().filter(e -> e.getSymbol().equals(baseAsset)).findAny().orElseThrow();
-                    Double deposit = openPosition.getDeposit() + t.getTotal();
-                    Double quantity = openPosition.getQuantity() + t.getAmount();
-                    Double averageCostBasis = deposit / quantity;
+                    BigDecimal deposit = openPosition.getDeposit().add(t.getTotal());
+                    BigDecimal quantity = openPosition.getQuantity().add(t.getAmount());
+                    BigDecimal averageCostBasis = deposit.divide(quantity, 4, RoundingMode.HALF_UP);
 
                     openPosition.setDeposit(deposit);
                     openPosition.setQuantity(quantity);
                     openPosition.setAverageCostBasis(averageCostBasis);
-                    openPosition.setMarketValue(openPosition.getQuantity() * openPosition.getCurrentPrice());
                 }
 
                 // Eladás
             } else {
                 val openPosition = openPositions.stream().filter(e -> e.getSymbol().equals(baseAsset)).findAny().orElseThrow();
                 // TODO: ha olyan kriptovalutát szeretnénk eladni, amiből nincs nyitott pozíciónk (eladás előtt nem volt vétel), akkor NullPointerException-t dob (Short pozíciók lekezelése)
-                Double averageCostBasis = openPosition.getAverageCostBasis();
+                BigDecimal averageCostBasis = openPosition.getAverageCostBasis();
 
                 val closedPosition = ClosedPositionDto.builder()
                         .symbol(tradingPair.getSymbol())
                         .date(t.getDate())
                         .sellPrice(t.getPrice())
-                        .deposit(t.getAmount() * averageCostBasis)
+                        .deposit(t.getAmount().multiply(averageCostBasis))
                         .quantity(t.getAmount())
                         .averageCostBasis(averageCostBasis)
-                        .marketValue(t.getAmount() * t.getPrice())
+                        .marketValue(t.getAmount().multiply( t.getPrice()))
                         .tradingType(tradingType)
                         .build();
 
                 closedPositions.add(closedPosition);
 
                 // Eladás után újra kalkulkuláljuk a megfelelő nyitott pozíciót, ha nem 0 a hátramaradt mennyiség
-                if (openPosition.getQuantity() - closedPosition.getQuantity() != 0L) {
-                    openPosition.setQuantity(openPosition.getQuantity() - closedPosition.getQuantity());
-                    openPosition.setDeposit(openPosition.getDeposit() - closedPosition.getDeposit());
+                if (!openPosition.getQuantity().subtract(closedPosition.getQuantity()).equals(BigDecimal.ZERO)) {
+                    openPosition.setQuantity(openPosition.getQuantity().subtract(closedPosition.getQuantity()));
+                    openPosition.setDeposit(openPosition.getDeposit().subtract(closedPosition.getDeposit()));
                 } else {
                     openPositions.remove(openPosition);
                 }
@@ -117,114 +118,69 @@ public class PerformanceService {
         performanceDto.setTrading_type(tradingType);
         performanceDto.setOpenPositionDtos(openPositions);
         performanceDto.setClosedPositionDtos(closedPositions);
+        BigDecimal totalClosedDeposit = BigDecimal.valueOf(0);
+        BigDecimal totalRealizedGains = BigDecimal.valueOf(0);
         for (val openPosition: openPositions) {
             val closePrice = binanceService.getLastPriceByDate(openPosition.getSymbol() + "USDT", ms);
             openPosition.setCurrentPrice(closePrice);
-            openPosition.setMarketValue(openPosition.getQuantity() * closePrice);
-            performanceDto.setTotalValue(performanceDto.getTotalValue() + openPosition.getMarketValue());
+            openPosition.setMarketValue(openPosition.getQuantity().multiply(closePrice));
+            performanceDto.setTotalValue(performanceDto.getTotalValue().add(openPosition.getMarketValue()));
         }
-        for (val closedPosition: closedPositions) {
-            performanceDto.setTotalValue(performanceDto.getTotalValue() + (closedPosition.getMarketValue() - closedPosition.getDeposit()));
-        }
+//        for (val closedPosition: closedPositions) {
+//            totalClosedDeposit = totalClosedDeposit.add(closedPosition.getDeposit());
+//            totalRealizedGains = totalRealizedGains.add(closedPosition.getMarketValue().subtract(closedPosition.getDeposit()));
+//        }
+//        BigDecimal kulonbseg = totalClosedDeposit.add(totalRealizedGains);
+//        performanceDto.setTotalValue(performanceDto.getTotalValue().add(kulonbseg));
         return performanceDto;
     }
 
-    public List<PerformanceDto> calculatePerformance(TRADING_TYPE tradingType) {
-        val performances = new ArrayList<PerformanceDto>();
-        // A mai naptól számított 7 nappal korábbi nap
-        LocalDateTime sevenDaysBefore = LocalDate.now()
-                .atTime(LocalTime.MAX)
-                .minus(7, ChronoUnit.DAYS);
-
-        val performance7 = calculatePositionsByDate(tradingType, sevenDaysBefore);
-        performances.add(performance7);
-        // 6
-        LocalDateTime sixDaysBefore = LocalDate.now()
-                .atTime(LocalTime.MAX)
-                .minus(6, ChronoUnit.DAYS);
-
-        val performance6 = calculatePositionsByDate(tradingType, sixDaysBefore);
-        performances.add(performance6);
-        // 5
-        LocalDateTime fiveDaysBefore = LocalDate.now()
-                .atTime(LocalTime.MAX)
-                .minus(5, ChronoUnit.DAYS);
-
-        val performance5 = calculatePositionsByDate(tradingType, fiveDaysBefore);
-        performances.add(performance5);
-        // 4
-        LocalDateTime fourDaysBefore = LocalDate.now()
-                .atTime(LocalTime.MAX)
-                .minus(4, ChronoUnit.DAYS);
-
-        val performance4 = calculatePositionsByDate(tradingType, fourDaysBefore);
-        performances.add(performance4);
-        // 3
-        LocalDateTime threeDaysBefore = LocalDate.now()
-                .atTime(LocalTime.MAX)
-                .minus(3, ChronoUnit.DAYS);
-
-        val performance3 = calculatePositionsByDate(tradingType, threeDaysBefore);
-        performances.add(performance3);
-        // 2
-        LocalDateTime twoDaysBefore = LocalDate.now()
-                .atTime(LocalTime.MAX)
-                .minus(2, ChronoUnit.DAYS);
-
-        val performance2 = calculatePositionsByDate(tradingType, twoDaysBefore);
-        performances.add(performance2);
-        // 1
-        LocalDateTime oneDayBefore = LocalDate.now()
-                .atTime(LocalTime.MAX)
-                .minus(1, ChronoUnit.DAYS);
-
-        val performance1 = calculatePositionsByDate(tradingType, oneDayBefore);
-        performances.add(performance1);
-
-        return performances;
-    }
-
-    public List<PerformanceDto> calculateDailySnapshots(int minusDays) {
+    public List<PerformanceDto> calculateDailySnapshots(LocalDate date) {
         val dailyAccountSnapshot = new ArrayList<PerformanceDto>();
-        val date = LocalDate.now()
-                .atTime(LocalTime.MAX)
-                .minus(minusDays, ChronoUnit.DAYS);
+        val dateTime = date.atTime(LocalTime.MAX);
 
-        val spotSnapshot = calculatePositionsByDate(TRADING_TYPE.SPOT, date);
+        val spotSnapshot = calculatePositionsByDate(TRADING_TYPE.SPOT, dateTime);
         dailyAccountSnapshot.add(spotSnapshot);
-        val crossSnapshot = calculatePositionsByDate(TRADING_TYPE.CROSS, date);
+        val crossSnapshot = calculatePositionsByDate(TRADING_TYPE.CROSS, dateTime);
         dailyAccountSnapshot.add(crossSnapshot);
-        val isolatedSnapshot = calculatePositionsByDate(TRADING_TYPE.ISOLATED, date);
+        val isolatedSnapshot = calculatePositionsByDate(TRADING_TYPE.ISOLATED, dateTime);
         dailyAccountSnapshot.add(isolatedSnapshot);
 
 
         return dailyAccountSnapshot;
     }
 
+
+    // TODO: A számolás nem teljes a zárt pozíciók beszámítása nélkül
     public void initAccountSnapshots() {
-        snapshotRepository.deleteAll();
         val user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        val snapshots = new ArrayList<Snapshot>();
+        // Megnézzük, hogy az elmúlt 7 nap snapshot-jai megtalálhatóak-e az adatbázisban, ha nem, akkor felvesszük
         for (int i = 7; i>=1; i--){
-            // A megadott napon lévő számlák
-            val dailyAccountSnapshot = calculateDailySnapshots(i);
-            var totalValue = 0;
-            for (val performanceDto : dailyAccountSnapshot) {
-                totalValue += performanceDto.getTotalValue();
+            val date = LocalDate.now()
+                    .minus(i, ChronoUnit.DAYS);
+            if (snapshotRepository.findByDate(date) == null){
+                val dailyAccountSnapshot = calculateDailySnapshots(date);
+                BigDecimal totalValue = BigDecimal.ZERO;
+                for (val performanceDto : dailyAccountSnapshot) {
+                    totalValue = totalValue.add(performanceDto.getTotalValue());
+                }
+                val snapshot = Snapshot.builder()
+                        .date(dailyAccountSnapshot.get(0).getDate())
+                        .accountTotal(totalValue)
+                        .user(user)
+                        .build();
+                snapshotRepository.save(snapshot);
             }
-            val snapshot = Snapshot.builder()
-                    .date(dailyAccountSnapshot.get(0).getDate())
-                    .accountTotal(totalValue)
-                    .user(user)
-                    .build();
-            snapshots.add(snapshot);
         }
-        snapshotRepository.saveAll(snapshots);
-        log.info("End of snapshot init");
     }
 
     public List<Snapshot> getLastSevenDays() {
         val user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        long startTime = System.nanoTime();
+        initAccountSnapshots();
+        long stopTime = System.nanoTime();
+        long elpasedTime = stopTime - startTime;
+        log.info("Snapshot init run time: " + String.valueOf(elpasedTime / 1000000000) + " seconds");
         return snapshotRepository.findAllByUser(user);
     }
 

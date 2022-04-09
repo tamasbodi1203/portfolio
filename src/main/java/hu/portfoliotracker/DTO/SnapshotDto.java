@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Builder
@@ -14,5 +15,5 @@ import java.time.LocalDate;
 public class SnapshotDto {
 
     private LocalDate date;
-    private double value;
+    private BigDecimal value;
 }

@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Builder
@@ -15,21 +16,21 @@ import java.time.LocalDateTime;
 public class ClosedPositionDto {
     private String symbol;
 
-    private double sellPrice;
+    private BigDecimal sellPrice;
 
     private LocalDateTime date;
 
-    private double deposit;
+    private BigDecimal deposit;
 
-    private double quantity;
+    private BigDecimal quantity;
 
-    private double averageCostBasis;
+    private BigDecimal averageCostBasis;
 
-    private double marketValue;
+    private BigDecimal marketValue;
 
-    private double realizedGains;
+    private BigDecimal realizedGains;
 
-    private double realizedGainsPercent;
+    private BigDecimal realizedGainsPercent;
 
     private TRADING_TYPE tradingType;
 }

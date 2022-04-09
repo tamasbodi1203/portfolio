@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import javax.validation.constraints.*;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
@@ -38,14 +39,14 @@ public class Trade {
     //FIXME: A mező üresen hagyása errort dob
     @Min(value = 0, message = "Az ár nem lehet negatív")
     @Column(name = "PRICE", nullable = false)
-    private double price;
+    private BigDecimal price;
 
     @Min(value = 0, message = "A mennyiség nem lehet negatív")
     @Column(name = "AMOUNT", nullable = false)
-    private double amount;
+    private BigDecimal amount;
 
     @Column(name = "TOTAL", nullable = false)
-    private double total;
+    private BigDecimal total;
 
     @Column(name = "TRADING_TYPE", nullable = false)
     @Enumerated(EnumType.STRING)

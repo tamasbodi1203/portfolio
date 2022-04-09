@@ -18,6 +18,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
+import java.math.BigDecimal;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
@@ -61,9 +62,9 @@ public class ImportHelper {
                                 .date(LocalDateTime.parse(csvRecord.get("Date(UTC)"), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
                                 .pair(csvRecord.get("Market"))
                                 .side(csvRecord.get("Type"))
-                                .price(Double.parseDouble(csvRecord.get("Price")))
-                                .amount(Double.parseDouble(csvRecord.get("Amount")))
-                                .total(Double.parseDouble(csvRecord.get("Total")))
+                                .price(new BigDecimal(csvRecord.get("Price")))
+                                .amount(new BigDecimal(Long.parseLong(csvRecord.get("Amount"))))
+                                .total(new BigDecimal(Long.parseLong(csvRecord.get("Total"))))
                                 .tradingType(tradingType)
                                 .build();
 
@@ -89,9 +90,9 @@ public class ImportHelper {
                                 .pair(csvRecord.get(1))
                                 .side(csvRecord.get(2))
                                 // Szimbólumok törlése a mezők végéről
-                                .price(Double.parseDouble(csvRecord.get(3).replaceAll("[^0-9.]", "")))
-                                .amount(Double.parseDouble(csvRecord.get(4).replaceAll("[^0-9.]", "")))
-                                .total(Double.parseDouble(csvRecord.get(5).replaceAll("[^0-9.]", "")))
+                                .price(new BigDecimal(csvRecord.get(3).replaceAll("[^0-9.]", "")))
+                                .amount(new BigDecimal(csvRecord.get(4).replaceAll("[^0-9.]", "")))
+                                .total(new BigDecimal(csvRecord.get(5).replaceAll("[^0-9.]", "")))
                                 .tradingType(tradingType)
                                 .build();
 
@@ -130,9 +131,9 @@ public class ImportHelper {
                         .date(LocalDateTime.parse(row.getCell(0).getStringCellValue(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
                         .pair(row.getCell(1).getStringCellValue())
                         .side(row.getCell(2).getStringCellValue())
-                        .price(Double.parseDouble(row.getCell(3).getStringCellValue()))
-                        .amount(Double.parseDouble(row.getCell(4).getStringCellValue()))
-                        .total(Double.parseDouble(row.getCell(5).getStringCellValue()))
+                        .price(new BigDecimal(row.getCell(3).getStringCellValue()))
+                        .amount(new BigDecimal(row.getCell(4).getStringCellValue()))
+                        .total(new BigDecimal(row.getCell(5).getStringCellValue()))
                         .tradingType(tradingType)
                         .build();
 

@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Builder
@@ -18,21 +19,21 @@ public class OpenPositionDto {
 
     private Long cmcId;
 
-    private double currentPrice;
+    private BigDecimal currentPrice;
 
     private LocalDateTime date;
 
-    private double deposit;
+    private BigDecimal deposit;
 
-    private double quantity;
+    private BigDecimal quantity;
 
-    private double averageCostBasis;
+    private BigDecimal averageCostBasis;
 
-    private double marketValue;
+    private BigDecimal marketValue;
 
-    private double unrealizedGains;
+    private BigDecimal unrealizedGains;
 
-    private double unrealizedGainsPercent;
+    private BigDecimal unrealizedGainsPercent;
 
     private TRADING_TYPE tradingType;
 

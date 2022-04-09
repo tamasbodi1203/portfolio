@@ -36,7 +36,6 @@ public class TradeController {
     @GetMapping
     @SneakyThrows
     public String main(Model model) {
-        performanceService.initAccountSnapshots();
         return "trade-history";
     }
 

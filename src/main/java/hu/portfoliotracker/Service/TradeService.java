@@ -27,7 +27,7 @@ public class TradeService {
     private TradingPairRepository tradingPairRepository;
 
     public void saveTrade(Trade trade){
-        trade.setTotal(trade.getPrice() * trade.getAmount());
+        trade.setTotal(trade.getPrice().multiply(trade.getAmount()));
         tradeRepository.save(trade);
         log.info("Trade added: " + trade.toString());
     }

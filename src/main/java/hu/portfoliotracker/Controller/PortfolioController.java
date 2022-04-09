@@ -1,7 +1,6 @@
 package hu.portfoliotracker.Controller;
 
 import hu.portfoliotracker.DTO.BalanceDto;
-import hu.portfoliotracker.Enum.TRADING_TYPE;
 import hu.portfoliotracker.Service.PerformanceService;
 import hu.portfoliotracker.Service.PortfolioService;
 import lombok.val;
@@ -47,13 +46,6 @@ public class PortfolioController {
         return "_" + tab;
     }
 
-    @GetMapping("/performance")
-    public String calculatePerformance(Model model){
-
-        model.addAttribute("chartData", getSpotPerformanceChartData());
-        return "performance-chart";
-    }
-
     @RequestMapping("content1")
     public String getContent1() {
         return "balance :: content1";
@@ -84,16 +76,6 @@ public class PortfolioController {
         val isolatedDto = balanceDto.get(2);
         for (val openPosition : isolatedDto.getOpenPositionDtos()) {
             listOfLists.add(List.of(openPosition.getSymbol(), openPosition.getMarketValue()));
-        }
-
-        return listOfLists;
-    }
-
-    private List<List<Object>> getSpotPerformanceChartData() {
-        val listOfLists = new ArrayList<List<Object>>();
-        val snapshots = performanceService.calculatePerformance(TRADING_TYPE.SPOT);
-        for (val snapshot : snapshots){
-            listOfLists.add(List.of(snapshot.getDate().toString(), snapshot.getTotalValue()));
         }
 
         return listOfLists;

@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Entity
@@ -24,7 +25,7 @@ public class Snapshot {
     private LocalDate date;
 
     @Column(name = "ACCOUNT_TOTAL", nullable = false)
-    private double accountTotal;
+    private BigDecimal accountTotal;
 
     @ManyToOne
     private User user;

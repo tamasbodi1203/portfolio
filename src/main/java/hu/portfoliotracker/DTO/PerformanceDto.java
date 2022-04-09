@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -23,5 +24,5 @@ public class PerformanceDto {
 
     private List<ClosedPositionDto> closedPositionDtos;
 
-    private Double totalValue = Double.valueOf(0);
+    private BigDecimal totalValue = BigDecimal.valueOf(0);
 }
