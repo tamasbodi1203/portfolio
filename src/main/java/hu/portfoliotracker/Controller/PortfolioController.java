@@ -1,6 +1,7 @@
 package hu.portfoliotracker.Controller;
 
 import hu.portfoliotracker.DTO.BalanceDto;
+import hu.portfoliotracker.Service.PerformanceService;
 import hu.portfoliotracker.Service.PortfolioService;
 import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,8 @@ public class PortfolioController {
 
     @Autowired
     private PortfolioService portfolioService;
+    @Autowired
+    private PerformanceService performanceService;
     private List<BalanceDto> balanceDto;
 
     @GetMapping
@@ -44,7 +47,7 @@ public class PortfolioController {
 
     @GetMapping("/performance")
     public void calculatePerformance(){
-        portfolioService.calculatePerformance();
+        performanceService.calculatePerformance();
     }
 
     @RequestMapping("content1")

@@ -81,7 +81,7 @@ public class BinanceService {
     @SneakyThrows
     public double getLastPriceByDate(String tradingPair, Long seconds) {
         RestTemplate restTemplate = new RestTemplate();
-        String binanceExchangeInfo = "https://api.binance.com/api/v3/klines?symbol=BTCBUSD&interval=1d&endTime=" + seconds.toString() + "&limit=1";
+        String binanceExchangeInfo = "https://api.binance.com/api/v3/klines?symbol=" + tradingPair + "&interval=1d&endTime=" + seconds.toString() + "&limit=1";
         ResponseEntity<String> response = restTemplate.getForEntity(binanceExchangeInfo, String.class);
         val mapper = new ObjectMapper();
         val root = mapper.readTree(response.getBody());
