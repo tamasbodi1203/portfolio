@@ -120,18 +120,17 @@ public class PerformanceService {
         performanceDto.setClosedPositionDtos(closedPositions);
         BigDecimal totalClosedDeposit = BigDecimal.valueOf(0);
         BigDecimal totalRealizedGains = BigDecimal.valueOf(0);
+        var gains = BigDecimal.ZERO;
         for (val openPosition: openPositions) {
             val closePrice = binanceService.getLastPriceByDate(openPosition.getSymbol() + "USDT", ms);
             openPosition.setCurrentPrice(closePrice);
             openPosition.setMarketValue(openPosition.getQuantity().multiply(closePrice));
-            performanceDto.setTotalValue(performanceDto.getTotalValue().add(openPosition.getMarketValue()));
+            gains = gains.add(performanceDto.getTotalValue().add(openPosition.getMarketValue().subtract(openPosition.getDeposit())));
         }
-//        for (val closedPosition: closedPositions) {
-//            totalClosedDeposit = totalClosedDeposit.add(closedPosition.getDeposit());
-//            totalRealizedGains = totalRealizedGains.add(closedPosition.getMarketValue().subtract(closedPosition.getDeposit()));
-//        }
-//        BigDecimal kulonbseg = totalClosedDeposit.add(totalRealizedGains);
-//        performanceDto.setTotalValue(performanceDto.getTotalValue().add(kulonbseg));
+        for (val closedPosition: closedPositions) {
+            gains = gains.add(closedPosition.getMarketValue().subtract(closedPosition.getDeposit()));
+        }
+        performanceDto.setTotalValue(gains);
         return performanceDto;
     }
 
@@ -158,6 +157,7 @@ public class PerformanceService {
         for (int i = 7; i>=1; i--){
             val date = LocalDate.now()
                     .minus(i, ChronoUnit.DAYS);
+            log.info(String.valueOf(date));
             if (snapshotRepository.findByDate(date) == null){
                 val dailyAccountSnapshot = calculateDailySnapshots(date);
                 BigDecimal totalValue = BigDecimal.ZERO;
@@ -182,6 +182,11 @@ public class PerformanceService {
         long elpasedTime = stopTime - startTime;
         log.info("Snapshot init run time: " + String.valueOf(elpasedTime / 1000000000) + " seconds");
         return snapshotRepository.findAllByUser(user);
+    }
+
+    public void deleteAllSnapshotsByUser() {
+        val user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        snapshotRepository.deleteAllByUser(user);
     }
 
 }

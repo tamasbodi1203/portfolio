@@ -188,6 +188,8 @@ public class TradeController {
     public String importFromFile(@RequestParam("file") MultipartFile file, @RequestParam ("type") TRADING_TYPE tradingType) {
         val importIsSuccessful = importService.importFromFile(file, tradingType);
         if (importIsSuccessful) {
+            performanceService.deleteAllSnapshotsByUser();
+            performanceService.getLastSevenDays();
             portfolioService.initBalances();
             return "redirect:/trade-history";
         } else {
