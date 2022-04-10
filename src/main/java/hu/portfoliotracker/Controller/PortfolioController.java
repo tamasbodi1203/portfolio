@@ -33,9 +33,9 @@ public class PortfolioController {
     @GetMapping("{tab}")
     public String tab(Model model, @PathVariable String tab) {
         //val portfolioDtos = portfolioService.refreshPortfolio();
-        model.addAttribute("spotBalanceDto", balanceDto.get(0));
-        model.addAttribute("crossBalanceDto", balanceDto.get(1));
-        model.addAttribute("isolatedBalanceDto", balanceDto.get(2));
+        if (balanceDto != null) model.addAttribute("spotBalanceDto", balanceDto.get(0));
+        if (balanceDto != null) model.addAttribute("crossBalanceDto", balanceDto.get(1));
+        if (balanceDto != null) model.addAttribute("isolatedBalanceDto", balanceDto.get(2));
         model.addAttribute("currency", "$");
 
         model.addAttribute("performanceChartData", getPerformanceChartData());

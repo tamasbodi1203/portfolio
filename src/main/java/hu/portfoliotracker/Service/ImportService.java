@@ -1,5 +1,6 @@
 package hu.portfoliotracker.Service;
 
+import hu.portfoliotracker.DTO.BalanceDto;
 import hu.portfoliotracker.Enum.TRADING_TYPE;
 import hu.portfoliotracker.Model.Trade;
 import hu.portfoliotracker.Model.User;
@@ -19,12 +20,13 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
 @Slf4j
 @Transactional
-public class importService {
+public class ImportService {
 
     @Autowired
     TradeRepository tradeRepository;
@@ -37,19 +39,32 @@ public class importService {
     }
 
     public boolean importFromFile(MultipartFile file, TRADING_TYPE tradingType) {
+        log.info("Kereskedések importálása");
+        long startTime = System.nanoTime();
+        long stopTime;
+        long elpasedTime;
+
         val extenstion = FilenameUtils.getExtension(file.getOriginalFilename());
         switch (extenstion) {
             case "csv":
                 saveCsv(file, tradingType);
+                stopTime = System.nanoTime();
+                elpasedTime = stopTime - startTime;
+                log.info("Kereskedések importálásának vége: " + String.valueOf(elpasedTime / 1000000000) + " seconds");
                 return true;
+
 
             case "xlsx":
                 saveXlsx(file, tradingType);
+                stopTime = System.nanoTime();
+                elpasedTime = stopTime - startTime;
+                log.info("Kereskedések importálásának vége: " + String.valueOf(elpasedTime / 1000000000) + " seconds");
                 return true;
 
             default:
                 log.error("Hiba történt a fájl beolvasása során");
                 return false;
+
         }
     }
 

@@ -115,12 +115,17 @@ public class PortfolioService {
     }
 
     public void initBalances() {
-
+        val user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        log.info("Pozíciók inicializálása");
+        long startTime = System.nanoTime();
         // Töröljük minden futtatáskor a már meglévő pozíciókat, hogy ne duplikálódjanak
         deleteAll();
         initPositions(TRADING_TYPE.SPOT);
         initPositions(TRADING_TYPE.CROSS);
         initPositions(TRADING_TYPE.ISOLATED);
+        long stopTime = System.nanoTime();
+        long elpasedTime = stopTime - startTime;
+        log.info("Pozíciók inicializálásának vége: " + String.valueOf(elpasedTime / 1000000000) + " seconds");
 
     }
 
@@ -133,12 +138,12 @@ public class PortfolioService {
 
     public void saveOpenPosition(OpenPosition openPosition){
         openPositionRepository.save(openPosition);
-        log.info("Nyitott pozíció hozzáadva: " + openPosition.toString());
+        //log.info("Nyitott pozíció hozzáadva: " + openPosition.toString());
     }
 
     public void saveClosedPosition(ClosedPosition closedPosition){
         closedPositionRepository.save(closedPosition);
-        log.info("Zárt pozíció hozzáadva: " + closedPosition.toString());
+        //log.info("Zárt pozíció hozzáadva: " + closedPosition.toString());
     }
 
     public List<OpenPosition> getOpenPositions(TRADING_TYPE tradingType){

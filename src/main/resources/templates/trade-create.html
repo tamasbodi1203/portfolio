@@ -8,11 +8,11 @@
 <div class="container">
     <!--/*@thymesVar id="trade" type="hu.portfoliotracker.Model.Trade"*/-->
     <form action="#" th:action="${trade.id} == null ? @{/trade-history/add} : @{/trade-history/edit/{id}(id=${trade.id})}" th:object="${trade}" method="post">
-<!--        <div class="form-group">-->
-<!--            <label for="date">Date</label>-->
-<!--            <input type="text" class="form-control" id="date"  th:field="*{date}">-->
-<!--            <span class="validationError" th:if="${#fields.hasErrors('date')}" th:errors="*{date}"></span>-->
-<!--        </div>-->
+        <div class="form-group">
+            <label for="date">Date</label>
+            <input type="text" class="form-control" id="date"  th:field="*{date}">
+            <span class="validationError" th:if="${#fields.hasErrors('date')}" th:errors="*{date}"></span>
+        </div>
         <div class="form-group">
             <label for="pair">Trading pair</label>
             <select class="form-control" id="pair" th:field="*{pair}">

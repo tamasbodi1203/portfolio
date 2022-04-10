@@ -19,7 +19,7 @@ import org.springframework.web.client.RestTemplate;
 @Service
 public class CoinMarketCapService {
 
-    private static String apiKey = "fa7d24ed-d4ca-4f46-b051-27e1cc3c48e8";
+    private static String apiKey = "{feltöltés miatt a privát kulcsom eltávolítottam}";
     private static String sandboxKey = "b54bcf4d-1bca-4e8e-9a24-22ff2c3d462c";
 
     @SneakyThrows

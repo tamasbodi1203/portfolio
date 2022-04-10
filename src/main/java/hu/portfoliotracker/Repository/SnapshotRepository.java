@@ -13,5 +13,7 @@ public interface SnapshotRepository extends JpaRepository<Snapshot, Long> {
 
     List<Snapshot> findAllByUser(User user);
 
-    Snapshot findByDate(LocalDate date);
+    void deleteAllByUser(User user);
+
+    Snapshot findByDateAndUser(LocalDate date, User user);
 }

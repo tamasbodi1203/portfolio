@@ -1,6 +1,5 @@
 package hu.portfoliotracker.Utility;
 
-import hu.portfoliotracker.Controller.AuthController;
 import hu.portfoliotracker.Enum.TRADING_TYPE;
 import hu.portfoliotracker.Model.Trade;
 import hu.portfoliotracker.Model.User;
