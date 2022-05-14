@@ -13,11 +13,15 @@ import hu.portfoliotracker.Repository.CryptocurrencyRepository;
 import hu.portfoliotracker.Repository.TradingPairRepository;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.ZonedDateTime;
 import java.util.HashSet;
 import java.util.List;
 
@@ -33,11 +37,12 @@ public class BinanceService {
     BinanceApiClientFactory factory = BinanceApiClientFactory.newInstance("Acp6nGjh0OKrJDhaPxcQN0AIlEnjiIweIQ7ugXNOEh5pyldpwf3YQmM8LRRqrzeP", "A7YmeLWN5NvYqZGUc3CBZ4WGBTun67hZtxBrXrbGbbFLBPy7k6DAdKbFYuzfF0cR");
     BinanceApiRestClient client = factory.newRestClient();
 
-    public double getLastPrice(String tradingPair) {
+    public BigDecimal getLastPrice(String tradingPair) {
         TickerStatistics tickerStatistics = client.get24HrPriceStatistics(tradingPair);
         log.info(tradingPair + " latest price: " + tickerStatistics.getLastPrice());
-        return Double.parseDouble(tickerStatistics.getLastPrice());
+        return new BigDecimal(tickerStatistics.getLastPrice());
     }
+
 
     public void getMyTradesTest() {
         Account account = client.getAccount();
@@ -72,6 +77,19 @@ public class BinanceService {
         JsonNode root = mapper.readTree(response.getBody());
         JsonNode symbols = root.path("symbols");
         log.info("valami");
+    }
+
+    @SneakyThrows
+    public BigDecimal getLastPriceByDate(String tradingPair, Long seconds) {
+        RestTemplate restTemplate = new RestTemplate();
+        String binanceExchangeInfo = "https://api.binance.com/api/v3/klines?symbol=" + tradingPair + "&interval=1d&endTime=" + seconds.toString() + "&limit=1";
+        ResponseEntity<String> response = restTemplate.getForEntity(binanceExchangeInfo, String.class);
+        val mapper = new ObjectMapper();
+        val root = mapper.readTree(response.getBody());
+        val closePrice = BigDecimal.valueOf(root.get(0).get(4).asDouble());
+        log.info(tradingPair + " close price: " + closePrice);
+        return closePrice;
+
     }
 
 }

@@ -27,7 +27,7 @@ public class TradeService {
     private TradingPairRepository tradingPairRepository;
 
     public void saveTrade(Trade trade){
-        trade.setTotal(trade.getPrice() * trade.getAmount());
+        trade.setTotal(trade.getPrice().multiply(trade.getAmount()));
         tradeRepository.save(trade);
         log.info("Trade added: " + trade.toString());
     }
@@ -38,7 +38,7 @@ public class TradeService {
 
     public List<Trade> getAllByTradingType(TRADING_TYPE tradingType) {
         val user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        return tradeRepository.findByTradingTypeOrderByOrderByDate(tradingType, user);
+        return tradeRepository.findByTradingTypeOrderByDate(tradingType, user);
     }
 
     public void deleteTrade(long id){

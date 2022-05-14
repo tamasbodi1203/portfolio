@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Builder
@@ -25,22 +26,22 @@ public class ClosedPosition {
     private String symbol;
 
     @Column(name = "SELL_PRICE")
-    private double sellPrice;
+    private BigDecimal sellPrice;
 
     @Column(name = "DATE")
     private LocalDateTime date;
 
     @Column(name = "DEPOSIT")
-    private double deposit;
+    private BigDecimal deposit;
 
     @Column(name = "QUANTITY")
-    private double quantity;
+    private BigDecimal quantity;
 
     @Column(name = "AVERAGE_COST_BASIS")
-    private double averageCostBasis;
+    private BigDecimal averageCostBasis;
 
     @Column(name = "MARKET_VALUE")
-    private double marketValue;
+    private BigDecimal marketValue;
 
     @Column(name = "TRADING_TYPE")
     @Enumerated(EnumType.STRING)

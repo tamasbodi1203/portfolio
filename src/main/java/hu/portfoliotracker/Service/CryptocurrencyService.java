@@ -19,7 +19,6 @@ public class CryptocurrencyService {
     TradingPairRepository tradingPairRepository;
     @Autowired
     CryptocurrencyRepository cryptocurrencyRepository;
-
     @Autowired
     BinanceService binanceService;
     @Autowired

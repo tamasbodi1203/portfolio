@@ -2,10 +2,7 @@ package hu.portfoliotracker.Controller;
 
 import hu.portfoliotracker.Enum.TRADING_TYPE;
 import hu.portfoliotracker.Model.Trade;
-import hu.portfoliotracker.Service.CoinMarketCapService;
-import hu.portfoliotracker.Service.PortfolioService;
-import hu.portfoliotracker.Service.TradeService;
-import hu.portfoliotracker.Service.importService;
+import hu.portfoliotracker.Service.*;
 import lombok.SneakyThrows;
 import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,15 +24,14 @@ public class TradeController {
 
     @Autowired
     private TradeService tradeService;
-
     @Autowired
     private importService importService;
-
     @Autowired
     private CoinMarketCapService coinMarketCapService;
-
     @Autowired
     private PortfolioService portfolioService;
+    @Autowired
+    private PerformanceService performanceService;
 
     @GetMapping
     @SneakyThrows
@@ -192,6 +188,8 @@ public class TradeController {
     public String importFromFile(@RequestParam("file") MultipartFile file, @RequestParam ("type") TRADING_TYPE tradingType) {
         val importIsSuccessful = importService.importFromFile(file, tradingType);
         if (importIsSuccessful) {
+            performanceService.deleteAllSnapshotsByUser();
+            performanceService.getLastSevenDays();
             portfolioService.initBalances();
             return "redirect:/trade-history";
         } else {

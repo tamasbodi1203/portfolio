@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Builder
@@ -31,13 +32,13 @@ public class OpenPosition {
     private LocalDateTime date;
 
     @Column(name = "DEPOSIT")
-    private double deposit;
+    private BigDecimal deposit;
 
     @Column(name = "QUANTITY")
-    private double quantity;
+    private BigDecimal quantity;
 
     @Column(name = "AVERAGE_COST_BASIS")
-    private double averageCostBasis;
+    private BigDecimal averageCostBasis;
 
     @Column(name = "TRADING_TYPE")
     @Enumerated(EnumType.STRING)

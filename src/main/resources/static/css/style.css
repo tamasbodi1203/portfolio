@@ -15,7 +15,15 @@
 }
 
 .table {
-  border: 1px solid black;
+    border: 1px solid black;
+    position: relative;
+    width: 100%;
+    z-index: 1;
+}
+
+.chart {
+    float: left;
+    width: 40%;
 }
 
 .title {
@@ -35,4 +43,25 @@
 
 .negative {
     color: red;
+}
+
+.flex-container {
+  display: flex;
+  min-height: 30%;
+}
+
+.distribution-chart {
+    position: absolute;
+    width: 30%;
+    height: 30%;
+    right: 0%;
+    z-index: 0;
+}
+
+.performance-chart {
+    position: absolute;
+    width: 30%;
+    height: 40%;
+    left: 0%;
+    z-index: 0;
 }

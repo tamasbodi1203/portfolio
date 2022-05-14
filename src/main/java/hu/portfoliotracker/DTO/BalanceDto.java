@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Builder
@@ -17,14 +18,14 @@ public class BalanceDto {
 
     private List<ClosedPositionDto> closedPositionDtos;
 
-    private Double totalDeposit;
+    private BigDecimal totalDeposit;
 
-    private Double totalUnrealizedGains;
+    private BigDecimal totalUnrealizedGains;
 
-    private Double totalUnrealizedGainsPercent;
+    private BigDecimal totalUnrealizedGainsPercent;
 
-    private Double totalRealizedGains;
+    private BigDecimal totalRealizedGains;
 
-    private Double totalRealizedGainsPercent;
+    private BigDecimal totalRealizedGainsPercent;
 
 }
